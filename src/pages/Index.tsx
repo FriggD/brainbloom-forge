@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useStudy } from '@/contexts/StudyContext';
 import { Layout } from '@/components/layout/Layout';
+import { UpcomingEventsCard } from '@/components/calendar/UpcomingEventsCard';
 import { useState, useEffect } from 'react';
 
 const features = [
@@ -79,6 +80,11 @@ const Index = () => {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* Upcoming Events */}
+        <div className="mb-12">
+          <UpcomingEventsCard />
         </div>
 
         {/* Quick Actions */}

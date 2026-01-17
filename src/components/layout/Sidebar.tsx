@@ -12,7 +12,8 @@ import {
   Search,
   Layers,
   Menu,
-  X
+  X,
+  Calendar
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStudy } from '@/contexts/StudyContext';
@@ -62,6 +63,7 @@ export const Sidebar = () => {
     { icon: FileText, label: 'Método Cornell', path: '/cornell' },
     { icon: Network, label: 'Mind Mapping', path: '/mindmap' },
     { icon: Layers, label: 'Flashcards', path: '/flashcards' },
+    { icon: Calendar, label: 'Calendário', path: '/calendar' },
   ];
 
   const avatarUrl = profile.avatarSeed 
