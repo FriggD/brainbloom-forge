@@ -40,7 +40,7 @@ export const CreateDeckDialog = ({
   const { folders, tags } = useStudy();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [folderId, setFolderId] = useState<string>('');
+  const [folderId, setFolderId] = useState<string>('none');
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -50,7 +50,7 @@ export const CreateDeckDialog = ({
     await onSubmit(
       title.trim(),
       description.trim(),
-      folderId || undefined,
+      folderId === 'none' ? undefined : folderId,
       selectedTagIds.length > 0 ? selectedTagIds : undefined
     );
     setLoading(false);
@@ -61,7 +61,7 @@ export const CreateDeckDialog = ({
   const resetForm = () => {
     setTitle('');
     setDescription('');
-    setFolderId('');
+    setFolderId('none');
     setSelectedTagIds([]);
   };
 
@@ -107,7 +107,7 @@ export const CreateDeckDialog = ({
                 <SelectValue placeholder="Selecione uma pasta (opcional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Nenhuma</SelectItem>
+                <SelectItem value="none">Nenhuma</SelectItem>
                 {folders.map((folder) => (
                   <SelectItem key={folder.id} value={folder.id}>
                     {folder.name}
