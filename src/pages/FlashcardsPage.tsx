@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Layers } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { useFlashcards } from '@/hooks/useFlashcards';
 import { DeckCard } from '@/components/flashcards/DeckCard';
 import { CreateDeckDialog } from '@/components/flashcards/CreateDeckDialog';
@@ -123,13 +124,10 @@ const FlashcardsPage = () => {
 
   return (
     <Layout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="p-8">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Layers className="w-6 h-6 text-primary" />
-              Flashcards
-            </h1>
+            <h1 className="text-3xl font-bold text-foreground">Flashcards</h1>
             <p className="text-muted-foreground mt-1">
               Crie e estude seus flashcards
             </p>
@@ -141,19 +139,21 @@ const FlashcardsPage = () => {
         </div>
 
         {decks.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed rounded-lg">
-            <Layers className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Nenhum deck criado</h3>
-            <p className="text-muted-foreground mb-4">
-              Comece criando seu primeiro deck de flashcards
-            </p>
-            <Button onClick={() => setShowCreateDeck(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Criar Deck
-            </Button>
-          </div>
+          <Card className="max-w-lg mx-auto mt-16">
+            <CardContent className="pt-8 text-center">
+              <Layers className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
+              <h3 className="text-lg font-semibold mb-2">Nenhum deck criado</h3>
+              <p className="text-muted-foreground mb-4">
+                Comece criando seu primeiro deck de flashcards
+              </p>
+              <Button onClick={() => setShowCreateDeck(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Criar Deck
+              </Button>
+            </CardContent>
+          </Card>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {decks.map((deck) => (
               <DeckCard
                 key={deck.id}
