@@ -50,6 +50,25 @@ export const DeckCard = ({
               <p className="text-sm text-muted-foreground mt-1">{deck.description}</p>
             )}
           </div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button size="icon" variant="ghost" className="text-destructive h-8 w-8">
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Deletar deck?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta ação não pode ser desfeita. Todos os flashcards serão deletados.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={onDelete}>Deletar</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -80,38 +99,19 @@ export const DeckCard = ({
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2 pt-2">
-          <Button size="sm" onClick={onStudy} disabled={cardCount === 0}>
-            <Play className="w-4 h-4 mr-1" />
-            Estudar
+        <div className="grid grid-cols-3 gap-2 pt-2">
+          <Button size="sm" onClick={onStudy} disabled={cardCount === 0} className="w-full px-2">
+            <Play className="w-4 h-4 sm:mr-1" />
+            <span className="hidden sm:inline">Estudar</span>
           </Button>
-          <Button size="sm" variant="outline" onClick={onEdit}>
-            <Edit2 className="w-4 h-4 mr-1" />
-            Editar
+          <Button size="sm" variant="outline" onClick={onEdit} className="w-full px-2">
+            <Edit2 className="w-4 h-4 sm:mr-1" />
+            <span className="hidden sm:inline">Editar</span>
           </Button>
-          <Button size="sm" variant="outline" onClick={onImport}>
-            <Upload className="w-4 h-4 mr-1" />
-            Importar
+          <Button size="sm" variant="outline" onClick={onImport} className="w-full !px-3">
+            <Upload className="w-4 h-4 sm:mr-1" />
+            <span className="hidden sm:inline">Importar</span>
           </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button size="sm" variant="ghost" className="text-destructive">
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Deletar deck?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esta ação não pode ser desfeita. Todos os flashcards serão deletados.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={onDelete}>Deletar</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
         </div>
       </CardContent>
     </Card>
