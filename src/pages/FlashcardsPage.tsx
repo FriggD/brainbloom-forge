@@ -9,6 +9,7 @@ import { CreateDeckDialog } from '@/components/flashcards/CreateDeckDialog';
 import { ImportCSVDialog } from '@/components/flashcards/ImportCSVDialog';
 import { FlashcardViewer } from '@/components/flashcards/FlashcardViewer';
 import { FlashcardEditor } from '@/components/flashcards/FlashcardEditor';
+import { QuickReviewCarousel } from '@/components/flashcards/QuickReviewCarousel';
 import { Flashcard, FlashcardDeck } from '@/types/flashcard';
 import {
   Dialog,
@@ -39,16 +40,20 @@ const FlashcardsPage = () => {
   const [editingDeck, setEditingDeck] = useState<FlashcardDeck | null>(null);
   const [editingCards, setEditingCards] = useState<Flashcard[]>([]);
   const [cardCounts, setCardCounts] = useState<Record<string, number>>({});
+  const [allCards, setAllCards] = useState<Flashcard[]>([]);
 
-  // Fetch card counts for all decks
+  // Fetch card counts for all decks and all cards for quick review
   useEffect(() => {
     const fetchCounts = async () => {
       const counts: Record<string, number> = {};
+      const allCardsArray: Flashcard[] = [];
       for (const deck of decks) {
         const cards = await getFlashcards(deck.id);
         counts[deck.id] = cards.length;
+        allCardsArray.push(...cards);
       }
       setCardCounts(counts);
+      setAllCards(allCardsArray);
     };
     if (decks.length > 0) {
       fetchCounts();
@@ -105,7 +110,7 @@ const FlashcardsPage = () => {
   if (studyingDeck) {
     return (
       <Layout>
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto p-4 md:p-8">
           <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <Layers className="w-6 h-6 text-primary" />
             Estudando: {studyingDeck.title}
@@ -124,8 +129,8 @@ const FlashcardsPage = () => {
 
   return (
     <Layout>
-      <div className="p-8">
-        <div className="flex items-center justify-between mb-8">
+      <div className="p-4 md:p-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Flashcards</h1>
             <p className="text-muted-foreground mt-1">
@@ -153,18 +158,29 @@ const FlashcardsPage = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {decks.map((deck) => (
-              <DeckCard
-                key={deck.id}
-                deck={deck}
-                cardCount={cardCounts[deck.id] || 0}
-                onStudy={() => handleStudy(deck)}
-                onEdit={() => handleEdit(deck)}
-                onDelete={() => deleteDeck(deck.id)}
-                onImport={() => setImportDeckId(deck.id)}
-              />
-            ))}
+          <div className="space-y-8">
+            {/* Quick Review Section */}
+            <div className="bg-muted/30 rounded-lg p-6">
+              <QuickReviewCarousel allCards={allCards} />
+            </div>
+
+            {/* Decks Grid Section */}
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Meus Decks</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {decks.map((deck) => (
+                  <DeckCard
+                    key={deck.id}
+                    deck={deck}
+                    cardCount={cardCounts[deck.id] || 0}
+                    onStudy={() => handleStudy(deck)}
+                    onEdit={() => handleEdit(deck)}
+                    onDelete={() => deleteDeck(deck.id)}
+                    onImport={() => setImportDeckId(deck.id)}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>
