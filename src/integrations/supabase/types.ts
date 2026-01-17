@@ -14,6 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
+      content_hub: {
+        Row: {
+          created_at: string
+          description: string | null
+          folder_id: string | null
+          id: string
+          link: string
+          priority: string
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          folder_id?: string | null
+          id?: string
+          link: string
+          priority?: string
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          folder_id?: string | null
+          id?: string
+          link?: string
+          priority?: string
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_hub_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_hub_tags: {
+        Row: {
+          content_id: string
+          id: string
+          tag_id: string
+        }
+        Insert: {
+          content_id: string
+          id?: string
+          tag_id: string
+        }
+        Update: {
+          content_id?: string
+          id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_hub_tags_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content_hub"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_hub_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cornell_note_tags: {
         Row: {
           id: string
