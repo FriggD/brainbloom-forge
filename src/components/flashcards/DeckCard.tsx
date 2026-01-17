@@ -101,16 +101,16 @@ export const DeckCard = ({
 
         <div className="grid grid-cols-3 gap-2 pt-2">
           <Button size="sm" onClick={onStudy} disabled={cardCount === 0} className="w-full px-1 sm:px-2">
-            <Play className="w-4 h-4 sm:mr-1" />
-            <span className="hidden sm:inline">Estudar</span>
+            <Play className="w-4 h-4" />
+            <span className="hidden xl:inline ml-1">Estudar</span>
           </Button>
           <Button size="sm" variant="outline" onClick={onEdit} className="w-full px-1 sm:px-2">
-            <Edit2 className="w-4 h-4 sm:mr-1" />
-            <span className="hidden sm:inline">Editar</span>
+            <Edit2 className="w-4 h-4" />
+            <span className="hidden xl:inline ml-1">Editar</span>
           </Button>
-          <Button size="sm" variant="outline" onClick={onImport} className="w-full px-1 sm:px-3">
-            <Upload className="w-4 h-4 sm:mr-1" />
-            <span className="hidden sm:inline">Importar</span>
+          <Button size="sm" variant="outline" onClick={onImport} className="w-full px-1 sm:px-2">
+            <Upload className="w-4 h-4" />
+            <span className="hidden xl:inline ml-1">Importar</span>
           </Button>
         </div>
       </CardContent>
