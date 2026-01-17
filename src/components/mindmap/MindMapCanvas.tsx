@@ -14,11 +14,11 @@ interface MindMapCanvasProps {
 }
 
 const nodeColors = [
-  'hsl(333, 71%, 50%)',
-  'hsl(200, 70%, 50%)',
-  'hsl(150, 60%, 45%)',
-  'hsl(45, 90%, 50%)',
-  'hsl(280, 60%, 55%)',
+  'hsl(var(--chart-1))',
+  'hsl(var(--chart-2))',
+  'hsl(var(--chart-3))',
+  'hsl(var(--chart-4))',
+  'hsl(var(--chart-5))',
 ];
 
 export const MindMapCanvas = ({ mindMap, onSave, onAutoSave }: MindMapCanvasProps) => {

@@ -76,8 +76,8 @@ export const Sidebar = () => {
               className={cn(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                 location.pathname === item.path
-                  ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                  : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-sidebar-foreground hover:bg-accent hover:text-accent-foreground'
               )}
             >
               <item.icon className="w-4 h-4" />

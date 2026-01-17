@@ -1,0 +1,86 @@
+/* Orquídea Theme */
+.orquidea {
+  --background: 0 0% 100%;
+  --foreground: 330 50% 15%;
+  --card: 0 0% 100%;
+  --card-foreground: 330 50% 15%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 330 50% 15%;
+  --primary: 343 71% 61%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 351 73% 66%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 343 30% 96%;
+  --muted-foreground: 330 30% 40%;
+  --accent: 343 71% 61%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 343 30% 88%;
+  --input: 343 30% 88%;
+  --ring: 343 71% 61%;
+  --radius: 0.5rem;
+  --chart-1: 343 71% 61%;
+  --chart-2: 351 73% 66%;
+  --chart-3: 330 65% 70%;
+  --chart-4: 343 60% 75%;
+  --chart-5: 351 55% 80%;
+}
+
+/* Sapphira Theme */
+.sapphira {
+  --background: 0 0% 100%;
+  --foreground: 210 100% 15%;
+  --card: 0 0% 100%;
+  --card-foreground: 210 100% 15%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 210 100% 15%;
+  --primary: 210 96% 32%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 80% 45%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 210 30% 96%;
+  --muted-foreground: 210 30% 40%;
+  --accent: 210 96% 32%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 210 30% 88%;
+  --input: 210 30% 88%;
+  --ring: 210 96% 32%;
+  --radius: 0.5rem;
+  --chart-1: 210 96% 32%;
+  --chart-2: 210 80% 45%;
+  --chart-3: 210 70% 55%;
+  --chart-4: 210 60% 65%;
+  --chart-5: 210 50% 75%;
+}
+
+/* Bubblegum Theme */
+.bubblegum {
+  --background: 0 0% 100%;
+  --foreground: 355 50% 15%;
+  --card: 0 0% 100%;
+  --card-foreground: 355 50% 15%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 355 50% 15%;
+  --primary: 355 80% 66%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 355 70% 75%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 355 30% 96%;
+  --muted-foreground: 355 30% 40%;
+  --accent: 355 80% 66%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 355 30% 88%;
+  --input: 355 30% 88%;
+  --ring: 355 80% 66%;
+  --radius: 0.5rem;
+  --chart-1: 355 80% 66%;
+  --chart-2: 355 70% 75%;
+  --chart-3: 355 60% 80%;
+  --chart-4: 10 75% 70%;
+  --chart-5: 25 70% 75%;
+}
