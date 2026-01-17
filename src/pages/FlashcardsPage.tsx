@@ -182,19 +182,21 @@ const FlashcardsPage = () => {
       />
 
       <Dialog open={!!editingDeck} onOpenChange={(open) => !open && setEditingDeck(null)}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-3xl h-[90vh] flex flex-col p-0">
+          <DialogHeader className="px-6 py-4 border-b">
             <DialogTitle>Editar Deck: {editingDeck?.title}</DialogTitle>
           </DialogHeader>
-          {editingDeck && (
-            <FlashcardEditor
-              cards={editingCards}
-              onAdd={(front, back) => addFlashcard(editingDeck.id, front, back)}
-              onUpdate={updateFlashcard}
-              onDelete={deleteFlashcard}
-              onRefresh={refreshEditingCards}
-            />
-          )}
+          <div className="flex-1 overflow-y-auto px-6 py-4">
+            {editingDeck && (
+              <FlashcardEditor
+                cards={editingCards}
+                onAdd={(front, back) => addFlashcard(editingDeck.id, front, back)}
+                onUpdate={updateFlashcard}
+                onDelete={deleteFlashcard}
+                onRefresh={refreshEditingCards}
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </Layout>

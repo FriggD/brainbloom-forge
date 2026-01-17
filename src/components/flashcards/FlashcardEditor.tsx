@@ -77,35 +77,37 @@ export const FlashcardEditor = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Add new card form */}
       <Card className="border-dashed">
-        <CardHeader>
+        <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Plus className="w-4 h-4" />
             Adicionar Novo Flashcard
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
+        <CardContent className="space-y-3">
+          <div className="space-y-1.5">
             <label className="text-sm font-medium">Frente (Pergunta)</label>
             <Textarea
               value={newFront}
               onChange={(e) => setNewFront(e.target.value)}
               placeholder="Digite a pergunta..."
               rows={2}
+              className="resize-none"
             />
           </div>
-          <div>
+          <div className="space-y-1.5">
             <label className="text-sm font-medium">Verso (Resposta)</label>
             <Textarea
               value={newBack}
               onChange={(e) => setNewBack(e.target.value)}
               placeholder="Digite a resposta..."
               rows={2}
+              className="resize-none"
             />
           </div>
-          <Button onClick={handleAdd} disabled={!newFront.trim() || !newBack.trim()}>
+          <Button onClick={handleAdd} disabled={!newFront.trim() || !newBack.trim()} size="sm">
             <Plus className="w-4 h-4 mr-2" />
             Adicionar
           </Button>
@@ -113,30 +115,32 @@ export const FlashcardEditor = ({
       </Card>
 
       {/* Card list */}
-      <div className="space-y-3">
-        <h3 className="font-medium">Flashcards ({cards.length})</h3>
+      <div className="space-y-2">
+        <h3 className="font-medium text-sm">Flashcards ({cards.length})</h3>
         {cards.length === 0 ? (
-          <p className="text-muted-foreground text-sm">Nenhum flashcard ainda.</p>
+          <p className="text-muted-foreground text-sm py-4">Nenhum flashcard ainda.</p>
         ) : (
           cards.map((card, index) => (
             <Card key={card.id}>
-              <CardContent className="p-4">
+              <CardContent className="p-3">
                 {editingId === card.id ? (
-                  <div className="space-y-3">
-                    <div>
+                  <div className="space-y-2.5">
+                    <div className="space-y-1.5">
                       <label className="text-sm font-medium">Frente</label>
                       <Textarea
                         value={editFront}
                         onChange={(e) => setEditFront(e.target.value)}
                         rows={2}
+                        className="resize-none"
                       />
                     </div>
-                    <div>
+                    <div className="space-y-1.5">
                       <label className="text-sm font-medium">Verso</label>
                       <Textarea
                         value={editBack}
                         onChange={(e) => setEditBack(e.target.value)}
                         rows={2}
+                        className="resize-none"
                       />
                     </div>
                     <div className="flex gap-2">
@@ -153,7 +157,7 @@ export const FlashcardEditor = ({
                 ) : (
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2 mb-1.5">
                         <span className="text-xs bg-muted px-2 py-0.5 rounded">
                           #{index + 1}
                         </span>
