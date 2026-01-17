@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useStudy } from '@/contexts/StudyContext';
 import { Layout } from '@/components/layout/Layout';
+import { useState, useEffect } from 'react';
 
 const features = [
   {
@@ -38,6 +39,15 @@ const features = [
 
 const Index = () => {
   const { cornellNotes, mindMaps, folders } = useStudy();
+  const [nickname, setNickname] = useState('StudyHub');
+
+  useEffect(() => {
+    const saved = localStorage.getItem('userProfile');
+    if (saved) {
+      const data = JSON.parse(saved);
+      setNickname(data.nickname || 'StudyHub');
+    }
+  }, []);
 
   const stats = [
     { label: 'Anotações Cornell', value: cornellNotes.length },
@@ -51,7 +61,7 @@ const Index = () => {
         {/* Hero Section */}
         <div className="mb-12">
           <h1 className="text-4xl font-bold mb-4 text-foreground">
-            Bem-vindo ao <span className="text-primary">StudyHub</span>
+            Bem-vindo, <span className="text-primary">{nickname}</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
             Organize seus estudos de forma inteligente com o Método Cornell e Mind Mapping.

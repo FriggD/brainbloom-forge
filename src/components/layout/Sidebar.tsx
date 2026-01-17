@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   FolderOpen, 
@@ -24,6 +24,20 @@ export const Sidebar = () => {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['1']));
   const [showCreateFolder, setShowCreateFolder] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [profile, setProfile] = useState({ nickname: 'StudyHub', course: '', profession: '', avatarSeed: '' });
+
+  useEffect(() => {
+    const saved = localStorage.getItem('userProfile');
+    if (saved) {
+      const data = JSON.parse(saved);
+      setProfile({
+        nickname: data.nickname || 'StudyHub',
+        course: data.course || '',
+        profession: data.profession || '',
+        avatarSeed: data.avatarSeed || ''
+      });
+    }
+  }, []);
 
   const toggleFolder = (folderId: string) => {
     setExpandedFolders((prev) => {
@@ -47,10 +61,27 @@ export const Sidebar = () => {
     { icon: Layers, label: 'Flashcards', path: '/flashcards' },
   ];
 
+  const avatarUrl = profile.avatarSeed 
+    ? `https://api.dicebear.com/7.x/identicon/svg?seed=${profile.avatarSeed}`
+    : null;
+  const subtitle = profile.course || profile.profession;
+
   return (
     <aside className="w-64 h-screen bg-sidebar border-r border-sidebar-border flex flex-col">
       <div className="p-4 border-b border-sidebar-border">
-        <h1 className="text-xl font-bold text-sidebar-foreground">📚 StudyHub</h1>
+        <div className="flex items-center gap-3">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Avatar" className="w-8 h-8 rounded-full" />
+          ) : (
+            <span className="text-2xl">📚</span>
+          )}
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl font-bold text-sidebar-foreground truncate">{profile.nickname}</h1>
+            {subtitle && (
+              <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Search Button */}

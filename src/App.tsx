@@ -12,6 +12,7 @@ import MindMapPage from "./pages/MindMapPage";
 import FlashcardsPage from "./pages/FlashcardsPage";
 import SettingsPage from "./pages/SettingsPage";
 import ThemeSettingsPage from "./pages/ThemeSettingsPage";
+import ProfileSettingsPage from "./pages/ProfileSettingsPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
@@ -52,6 +53,7 @@ const App = () => (
                 <Route path="/flashcards" element={<ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="/settings/theme" element={<ProtectedRoute><ThemeSettingsPage /></ProtectedRoute>} />
+              <Route path="/settings/profile" element={<ProtectedRoute><ProfileSettingsPage /></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </StudyProvider>
