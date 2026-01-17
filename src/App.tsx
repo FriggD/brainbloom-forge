@@ -8,6 +8,7 @@ import { StudyProvider } from "@/contexts/StudyContext";
 import Index from "./pages/Index";
 import CornellPage from "./pages/CornellPage";
 import MindMapPage from "./pages/MindMapPage";
+import FlashcardsPage from "./pages/FlashcardsPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/cornell" element={<ProtectedRoute><CornellPage /></ProtectedRoute>} />
               <Route path="/mindmap" element={<ProtectedRoute><MindMapPage /></ProtectedRoute>} />
+              <Route path="/flashcards" element={<ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </StudyProvider>
