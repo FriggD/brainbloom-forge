@@ -1,372 +1,205 @@
-# 🧠 BrainBloom Forge
+# BrainBloom Forge
 
-## 📋 Sobre o Projeto
+## Visão Geral
 
-**BrainBloom Forge** é uma plataforma completa de gerenciamento de estudos que combina técnicas comprovadas de aprendizagem com tecnologia moderna. O objetivo é fornecer aos estudantes ferramentas eficazes para organizar, revisar e consolidar conhecimento de forma inteligente e visual.
+BrainBloom Forge é uma plataforma de gerenciamento de estudos que integra técnicas comprovadas de aprendizagem com tecnologia moderna. O sistema oferece ferramentas para organização, revisão e consolidação de conhecimento através do Método Cornell, mapas mentais e flashcards inteligentes.
 
-### 🎯 Objetivo Principal
+## Objetivo
 
-Criar um ecossistema integrado de estudos que permita aos usuários:
-- Organizar anotações usando o Método Cornell
-- Visualizar conceitos através de mapas mentais
-- Revisar conteúdo com flashcards inteligentes
-- Gerenciar materiais de estudo por pastas e tags
-- Acompanhar progresso e prioridades de aprendizagem
+Fornecer um ecossistema completo de estudos que permite aos usuários organizar anotações estruturadas, visualizar conceitos de forma hierárquica, revisar conteúdo através de repetição espaçada e acompanhar progresso acadêmico com sistema de prioridades e categorização por pastas e tags.
 
 ---
 
-## 🚀 Funcionalidades Implementadas
+## Funcionalidades Atuais
 
-### ✅ Sistema de Autenticação
-- Cadastro e login de usuários
-- Autenticação segura via Supabase
-- Proteção de rotas privadas
-- Gerenciamento de sessão
+**Autenticação e Segurança**  
+Sistema completo de autenticação via Supabase com proteção de rotas, gerenciamento de sessão e Row Level Security (RLS) no banco de dados. Cada usuário possui isolamento completo de dados.
 
-### ✅ Método Cornell
-- Criação de anotações estruturadas com:
-  - Palavras-chave (cue column)
-  - Notas principais (notes column)
-  - Resumo (summary section)
-- Organização por matéria e número de aula
-- Sistema de prioridades (baixa, média, alta, crítica)
-- Vinculação a pastas
+**Método Cornell**  
+Implementação digital do método Cornell de anotações com três seções: palavras-chave (cue column), notas principais (notes column) e resumo (summary section). Suporta organização por matéria, número de aula, sistema de prioridades (baixa, média, alta, crítica), vinculação a pastas hierárquicas e salvamento automático com debounce de 2 segundos.
 
-### ✅ Mapas Mentais
-- Canvas interativo para criação de mapas mentais
-- Nós conectados hierarquicamente
-- Conceito central personalizável
-- Sistema de cores para organização visual
-- Salvamento automático
+**Mapas Mentais**  
+Canvas interativo para criação de mapas mentais com nós conectados hierarquicamente. Permite personalização de conceito central, sistema de cores para organização visual e salvamento automático das posições dos nós.
 
-### ✅ Flashcards
-- Criação de decks de flashcards
-- Editor de cartões (frente/verso)
-- Importação via CSV
-- Visualizador com flip animation
-- Organização por decks
+**Flashcards**  
+Sistema completo de decks de flashcards com editor de cartões (frente/verso), importação via CSV, visualizador com animação de flip, modo de estudo interativo e organização por decks. Suporta vinculação a pastas e tags com contador de cartões por deck.
 
-### ✅ Sistema de Organização
-- Pastas hierárquicas para categorização
-- Tags personalizadas com cores
-- Sistema de prioridades
-- Busca global de conteúdo
-- Filtros por pasta e tipo de conteúdo
+**Sistema de Organização**  
+Estrutura de pastas hierárquicas para categorização de conteúdo, tags personalizadas com cores, sistema de prioridades e busca global com filtros por pasta e tipo de conteúdo.
 
-### ✅ Interface do Usuário
-- Design responsivo e moderno
-- Tema claro/escuro
-- Sidebar com navegação intuitiva
-- Dashboard com estatísticas
-- Atividade recente
+**Interface**  
+Design responsivo com tema claro/escuro, sidebar colapsável com navegação intuitiva, busca global com atalho de teclado (⌘K), dashboard com estatísticas de uso, feed de atividade recente e perfil de usuário personalizável com avatar e informações acadêmicas.
 
 ---
 
-## 🔮 Funcionalidades Planejadas
+## Roadmap de Desenvolvimento
 
-### 📅 Calendário Acadêmico
-- Adicionar datas de aulas
-- Marcar provas e avaliações
-- Definir prazos de entrega de trabalhos
-- Notificações de eventos próximos
+**Calendário Acadêmico**  
+Integração de calendário para gerenciamento de datas de aulas, provas, avaliações e prazos de entrega de trabalhos com sistema de notificações.
 
-### 💾 Auto-Save
-- Salvamento automático de alterações
-- Prevenção de perda de dados
-- Sincronização em tempo real
+**Busca Global** ✅  
+Sistema de busca global implementado com atalho de teclado (⌘K), filtragem por tipo de conteúdo e navegação rápida entre recursos.
 
-### 🎨 Temas Personalizáveis
-- Modo claro, escuro e foco
-- Personalização de cores
-- Ajuste de contraste
+**Auto-Save** ✅  
+Sistema de salvamento automático implementado com debounce de 2 segundos, indicador visual de salvamento em progresso e geração automática de títulos para anotações não nomeadas.
 
-### 👤 Perfil de Usuário
-- Exibir nome e avatar do usuário logado
-- Configurações de conta
-- Estatísticas de uso
+**Perfil de Usuário** ✅  
+Sistema de perfil implementado com nickname personalizável, avatar gerado via DiceBear API, informações de curso e profissão, e persistência local dos dados.
 
-### 🎮 Gamificação
-- Sistema de XP (experiência)
-- Streaks (sequências de dias estudando)
-- Conquistas e badges
-- Ranking de progresso
+**Gamificação**  
+Sistema de experiência (XP), streaks de dias estudando consecutivos, conquistas desbloqueáveis e ranking de progresso para aumentar engajamento.
 
-### 📝 Revisão de Flashcards
-- Sistema de repetição espaçada
-- Anotações em flashcards
-- Estatísticas de acerto
+**Revisão Espaçada**  
+Algoritmo de repetição espaçada para flashcards, sistema de anotações em cartões e estatísticas de acerto para otimizar retenção de conhecimento.
 
-### 🤖 Integração com IA
-- Criar mapas mentais a partir de notas Cornell
-- Sugestões de palavras-chave
-- Geração automática de flashcards
+**Integração com IA**  
+Geração automática de mapas mentais a partir de notas Cornell, sugestões inteligentes de palavras-chave e criação automática de flashcards baseada em conteúdo.
 
-### 📚 Hub de Conteúdo
-- Salvar artigos da web
-- Salvar vídeos para assistir depois
-- Organizar recursos externos
-- Marcação de "ler mais tarde"
+**Hub de Conteúdo**  
+Funcionalidade para salvar artigos da web, vídeos e outros recursos externos com marcação de "ler mais tarde" e organização integrada ao sistema de pastas.
 
-### 🎨 Customização Avançada
-- Temas personalizados (não paywall)
-- Cores customizáveis
-- Avatares personalizados
-- Ícones de matéria
+**Customização Avançada**  
+Temas personalizados (claro, escuro, foco), cores customizáveis, avatares personalizados e ícones de matéria sem paywall.
 
-### 🔄 Atualização de Atividade Recente
-- Feed em tempo real
-- Histórico de modificações
-- Últimas ações realizadas
+**Melhorias de UX** ✅  
+Sidebar colapsável implementada para otimização de espaço, busca global com atalho de teclado, contador de cartões em flashcards e sistema de perfil personalizável. Pendente: canvas de mapa mental redimensionável com zoom, atualização em tempo real do feed de atividade e favicon dinâmico.
 
-### 📐 Mapa Mental Redimensionável
-- Canvas com zoom
-- Área de criação expansível
-- Suporte para mapas grandes
-
-### 🎯 Responsividade 
-- PWA (Progressive Web App)
+**Progressive Web App**  
+Transformação em PWA para suporte offline, instalação em dispositivos móveis e otimização completa para responsividade.
 
 ---
 
-## 🛠️ Stack Tecnológica
+## Arquitetura Técnica
 
-### Frontend
-- **React 18.3** - Biblioteca UI
-- **TypeScript** - Tipagem estática
-- **Vite** - Build tool e dev server
-- **React Router DOM** - Roteamento
-- **TanStack Query** - Gerenciamento de estado servidor
+**Frontend Stack**  
+React 18.3 com TypeScript para tipagem estática, Vite como build tool, React Router DOM para roteamento e TanStack Query para gerenciamento de estado servidor.
 
-### UI/UX
-- **Tailwind CSS** - Framework CSS utility-first
-- **shadcn/ui** - Componentes UI acessíveis
-- **Radix UI** - Primitivos de UI
-- **Lucide React** - Ícones
-- **next-themes** - Gerenciamento de temas
-- **Sonner** - Notificações toast
+**UI Framework**  
+Tailwind CSS como framework utility-first, shadcn/ui para componentes acessíveis, Radix UI para primitivos de interface, Lucide React para ícones, next-themes para gerenciamento de temas e Sonner para notificações toast.
 
-### Backend & Database
-- **Supabase** - Backend as a Service
-  - PostgreSQL database
-  - Authentication
-  - Row Level Security (RLS)
-  - Real-time subscriptions
+**Backend e Database**  
+Supabase como Backend as a Service fornecendo PostgreSQL database, autenticação JWT, Row Level Security (RLS) e real-time subscriptions.
 
-### Formulários & Validação
-- **React Hook Form** - Gerenciamento de formulários
-- **Zod** - Validação de schemas
-- **@hookform/resolvers** - Integração Zod + RHF
+**Formulários e Validação**  
+React Hook Form para gerenciamento de formulários, Zod para validação de schemas TypeScript e @hookform/resolvers para integração.
 
-### Utilitários
-- **date-fns** - Manipulação de datas
-- **clsx** / **tailwind-merge** - Merge de classes CSS
-- **cmdk** - Command palette
+**Utilitários**  
+date-fns para manipulação de datas, clsx e tailwind-merge para merge de classes CSS, cmdk para command palette, DiceBear API para geração de avatares e custom hooks para auto-save.
 
-### Testes
-- **Vitest** - Framework de testes
-- **Testing Library** - Testes de componentes
-- **jsdom** - Ambiente DOM para testes
+**Testes**  
+Vitest como framework de testes, Testing Library para testes de componentes React e jsdom para ambiente DOM simulado.
 
 ---
 
-## 📊 Estrutura do Banco de Dados
+## Estrutura do Banco de Dados
 
-### Tabelas Principais
+**Tabela folders**  
+Armazena estrutura hierárquica de pastas com suporte a subpastas ilimitadas, cores personalizadas e referência ao usuário proprietário.
 
-#### `folders`
-- Organização hierárquica de conteúdo
-- Suporte a subpastas
-- Cores personalizadas
+**Tabela cornell_notes**  
+Contém anotações do método Cornell com campos para título, matéria, data, número da aula, keywords (JSONB), notas principais, resumo, prioridade e referência à pasta.
 
-#### `cornell_notes`
-- Anotações no método Cornell
-- Keywords (JSONB)
-- Prioridades
-- Vinculação a pastas
+**Tabela mind_maps**  
+Armazena mapas mentais com título, conceito central, nodes (JSONB contendo posições x,y e hierarquia), prioridade e referência à pasta.
 
-#### `mind_maps`
-- Mapas mentais
-- Nodes (JSONB) com posições x,y
-- Conceito central
-- Estrutura hierárquica
+**Tabela flashcard_decks**  
+Gerencia decks de flashcards com título, descrição, referência à pasta e suporte a tags através de tabela de junção.
 
-#### `flashcard_decks`
-- Decks de flashcards
-- Descrição e título
-- Vinculação a pastas
+**Tabela flashcard_deck_tags**  
+Tabela de junção para relacionamento muitos-para-muitos entre decks e tags, permitindo categorização flexível.
 
-#### `flashcards`
-- Cartões individuais
-- Frente e verso
-- Vinculação a decks
+**Tabela flashcards**  
+Contém cartões individuais com frente, verso e referência ao deck.
 
-#### `tags`
-- Tags personalizadas
-- Cores customizáveis
-- Reutilizáveis
+**Tabela tags**  
+Armazena tags reutilizáveis com nome, cor personalizada e referência ao usuário.
 
-### Segurança
-- **Row Level Security (RLS)** habilitado em todas as tabelas
-- Políticas de acesso baseadas em `user_id`
-- Isolamento completo de dados entre usuários
+**Segurança**  
+Todas as tabelas possuem Row Level Security (RLS) habilitado com políticas baseadas em user_id, garantindo isolamento completo de dados entre usuários.
 
 ---
 
-## 🏗️ Arquitetura do Projeto
+## Estrutura do Projeto
 
 ```
 src/
-├── components/          # Componentes React
-│   ├── cornell/        # Componentes do Método Cornell
-│   ├── flashcards/     # Componentes de Flashcards
-│   ├── mindmap/        # Componentes de Mapas Mentais
-│   ├── layout/         # Layout e Sidebar
-│   ├── dialogs/        # Modais e diálogos
-│   ├── search/         # Busca global
-│   └── ui/             # Componentes shadcn/ui
-├── contexts/           # Context API
-│   ├── AuthContext     # Autenticação
-│   └── StudyContext    # Estado de estudos
-├── hooks/              # Custom hooks
-├── integrations/       # Integrações externas
-│   └── supabase/       # Cliente Supabase
-├── lib/                # Utilitários
-├── pages/              # Páginas da aplicação
-├── types/              # Definições TypeScript
-└── test/               # Configuração de testes
+├── components/
+│   ├── cornell/          # Componentes do Método Cornell
+│   ├── flashcards/       # Sistema de flashcards
+│   ├── mindmap/          # Canvas de mapas mentais
+│   ├── layout/           # Layout e navegação
+│   ├── dialogs/          # Modais e diálogos
+│   ├── search/           # Busca global
+│   └── ui/               # Componentes shadcn/ui
+├── contexts/
+│   ├── AuthContext.tsx   # Gerenciamento de autenticação
+│   └── StudyContext.tsx  # Estado global de estudos
+├── hooks/
+│   ├── useAutoSave.ts    # Hook de salvamento automático
+│   ├── useFlashcards.ts  # Gerenciamento de flashcards
+│   └── use-mobile.tsx    # Detecção de dispositivos móveis
+├── integrations/
+│   └── supabase/         # Cliente e tipos Supabase
+├── lib/                  # Funções utilitárias
+├── pages/                # Páginas da aplicação
+├── types/                # Definições TypeScript
+└── test/                 # Configuração de testes
 ```
 
 ---
 
-## 🚀 Como Executar
+## Instalação e Execução
 
-### Pré-requisitos
-- Node.js 18+ e npm
-- Conta no Supabase
+**Pré-requisitos**  
+Node.js 18+ e npm instalados. Conta ativa no Supabase.
 
-### Instalação
+**Configuração**
 
 ```bash
-# Clone o repositório
+# Clonar repositório
 git clone <YOUR_GIT_URL>
-
-# Entre no diretório
 cd brainbloom-forge
 
-# Instale as dependências
+# Instalar dependências
 npm install
 
-# Configure as variáveis de ambiente
-# Crie um arquivo .env com:
-# VITE_SUPABASE_URL=sua_url
-# VITE_SUPABASE_ANON_KEY=sua_chave
+# Configurar variáveis de ambiente
+# Criar arquivo .env na raiz:
+# VITE_SUPABASE_URL=sua_url_supabase
+# VITE_SUPABASE_ANON_KEY=sua_chave_anonima
 
-# Execute o projeto
+# Executar em desenvolvimento
 npm run dev
+
+# Build para produção
+npm run build
+
+# Preview do build
+npm run preview
 ```
 
-### Scripts Disponíveis
+**Scripts Disponíveis**
 
 ```bash
-npm run dev          # Inicia servidor de desenvolvimento
+npm run dev          # Servidor de desenvolvimento
 npm run build        # Build de produção
-npm run preview      # Preview do build
-npm run lint         # Executa linter
-npm run test         # Executa testes
+npm run lint         # Análise de código
+npm run test         # Executar testes
 npm run test:watch   # Testes em modo watch
 ```
 
 ---
 
-## 🎨 Design System
+## Segurança e Boas Práticas
 
-### Cores Principais
-- **Primary**: Azul vibrante para ações principais
-- **Secondary**: Tons complementares
-- **Muted**: Backgrounds e elementos secundários
-- **Accent**: Destaques e hover states
-
-### Componentes
-- Todos os componentes seguem padrões de acessibilidade WCAG
-- Suporte completo a teclado
-- ARIA labels apropriados
-- Responsividade mobile-first
+O projeto implementa autenticação JWT via Supabase, Row Level Security no banco de dados PostgreSQL, validação de dados no frontend com Zod e backend com políticas RLS, sanitização de inputs e HTTPS obrigatório em produção. Todos os componentes seguem padrões de acessibilidade WCAG com suporte completo a teclado e ARIA labels apropriados.
 
 ---
 
-## 🔐 Segurança
-
-- Autenticação JWT via Supabase
-- Row Level Security no banco de dados
-- Validação de dados no frontend e backend
-- Sanitização de inputs
-- HTTPS obrigatório em produção
-
----
-
-## 📈 Roadmap
-
-### Fase 1 - Fundação ✅
-- [x] Sistema de autenticação
-- [x] Método Cornell
-- [x] Mapas Mentais
-- [x] Flashcards básicos
-- [x] Sistema de pastas
-
-### Fase 2 - Melhorias UX 🚧
-- [ ] Calendário acadêmico
-- [ ] Auto-save
-- [ ] Temas personalizáveis
-- [ ] Perfil de usuário
-- [ ] Responsividade completa
-
-### Fase 3 - Gamificação 📋
-- [ ] Sistema de XP
-- [ ] Streaks
-- [ ] Conquistas
-- [ ] Revisão espaçada
-
-### Fase 4 - IA & Automação 🔮
-- [ ] Geração de mapas mentais via IA
-- [ ] Sugestões inteligentes
-- [ ] Análise de progresso
-- [ ] Recomendações personalizadas
-
-### Fase 5 - Hub de Conteúdo 📚
-- [ ] Salvar artigos
-- [ ] Salvar vídeos
-- [ ] Organização de recursos
-- [ ] Integração com plataformas
-
----
-
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Por favor:
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
----
-
-## 📝 Licença
+## Licença
 
 Este projeto está sob a licença MIT.
 
 ---
 
-## 👥 Autores
-
-Desenvolvido com ❤️ para estudantes que buscam excelência acadêmica.
-
----
-
-## 📞 Suporte
-
-Para dúvidas e suporte, abra uma issue no repositório.
-
----
-
-**BrainBloom Forge** - Cultivando conhecimento, colhendo sucesso 🌱✨
+**BrainBloom Forge** - Plataforma de gerenciamento de estudos para excelência acadêmica.
