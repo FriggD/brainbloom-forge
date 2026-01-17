@@ -30,14 +30,12 @@ export const CreateFolderDialog = ({ open, onOpenChange }: CreateFolderDialogPro
 
   const rootFolders = folders.filter((f) => !f.parentId);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!name.trim()) return;
 
-    addFolder({
-      id: crypto.randomUUID(),
+    await addFolder({
       name: name.trim(),
       parentId: parentId === 'none' ? undefined : parentId,
-      createdAt: new Date().toISOString(),
     });
 
     setName('');

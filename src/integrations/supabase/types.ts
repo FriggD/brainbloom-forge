@@ -14,7 +14,255 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cornell_note_tags: {
+        Row: {
+          id: string
+          note_id: string
+          tag_id: string
+        }
+        Insert: {
+          id?: string
+          note_id: string
+          tag_id: string
+        }
+        Update: {
+          id?: string
+          note_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cornell_note_tags_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "cornell_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cornell_note_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cornell_notes: {
+        Row: {
+          created_at: string
+          date: string
+          folder_id: string | null
+          id: string
+          keywords: Json
+          lesson_number: string | null
+          main_notes: string
+          priority: string
+          subject: string | null
+          summary: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          folder_id?: string | null
+          id?: string
+          keywords?: Json
+          lesson_number?: string | null
+          main_notes?: string
+          priority?: string
+          subject?: string | null
+          summary?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          folder_id?: string | null
+          id?: string
+          keywords?: Json
+          lesson_number?: string | null
+          main_notes?: string
+          priority?: string
+          subject?: string | null
+          summary?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cornell_notes_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      folders: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          name: string
+          parent_id: string | null
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          parent_id?: string | null
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          parent_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folders_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mind_map_tags: {
+        Row: {
+          id: string
+          mind_map_id: string
+          tag_id: string
+        }
+        Insert: {
+          id?: string
+          mind_map_id: string
+          tag_id: string
+        }
+        Update: {
+          id?: string
+          mind_map_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mind_map_tags_mind_map_id_fkey"
+            columns: ["mind_map_id"]
+            isOneToOne: false
+            referencedRelation: "mind_maps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mind_map_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mind_maps: {
+        Row: {
+          central_concept: string
+          created_at: string
+          folder_id: string | null
+          id: string
+          nodes: Json
+          priority: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          central_concept?: string
+          created_at?: string
+          folder_id?: string | null
+          id?: string
+          nodes?: Json
+          priority?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          central_concept?: string
+          created_at?: string
+          folder_id?: string | null
+          id?: string
+          nodes?: Json
+          priority?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mind_maps_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tags: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
