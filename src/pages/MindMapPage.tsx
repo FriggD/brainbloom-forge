@@ -35,6 +35,15 @@ const MindMapPage = () => {
     setEditingMindMap(undefined);
   };
 
+  const handleAutoSave = (mindMap: MindMap) => {
+    if (editingMindMap) {
+      updateMindMap(mindMap);
+    } else {
+      addMindMap(mindMap);
+      setEditingMindMap(mindMap);
+    }
+  };
+
   if (isEditing) {
     return (
       <Layout>
@@ -48,7 +57,7 @@ const MindMapPage = () => {
             </Button>
           </div>
           <div className="flex-1">
-            <MindMapCanvas mindMap={editingMindMap} onSave={handleSave} />
+            <MindMapCanvas mindMap={editingMindMap} onSave={handleSave} onAutoSave={handleAutoSave} />
           </div>
         </div>
       </Layout>

@@ -1,14 +1,16 @@
-import { useState, useRef, useEffect } from 'react';
-import { Plus, Trash2, Save, Move } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Plus, Trash2, Save, Move, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { MindMapNode, MindMap } from '@/types/study';
 import { cn } from '@/lib/utils';
+import { useAutoSave } from '@/hooks/useAutoSave';
 
 interface MindMapCanvasProps {
   mindMap?: MindMap;
   onSave: (mindMap: MindMap) => void;
+  onAutoSave?: (mindMap: MindMap) => void;
 }
 
 const nodeColors = [
@@ -19,7 +21,7 @@ const nodeColors = [
   'hsl(280, 60%, 55%)',
 ];
 
-export const MindMapCanvas = ({ mindMap, onSave }: MindMapCanvasProps) => {
+export const MindMapCanvas = ({ mindMap, onSave, onAutoSave }: MindMapCanvasProps) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [title, setTitle] = useState(mindMap?.title || '');
   const [nodes, setNodes] = useState<MindMapNode[]>(
@@ -31,6 +33,7 @@ export const MindMapCanvas = ({ mindMap, onSave }: MindMapCanvasProps) => {
   const [editingNode, setEditingNode] = useState<string | null>(null);
   const [draggedNode, setDraggedNode] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [hasManualSave, setHasManualSave] = useState(false);
 
   const handleAddNode = (parentId?: string) => {
     const parent = parentId ? nodes.find((n) => n.id === parentId) : nodes[0];
@@ -96,11 +99,22 @@ export const MindMapCanvas = ({ mindMap, onSave }: MindMapCanvasProps) => {
     setDraggedNode(null);
   };
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     const now = new Date().toISOString();
-    onSave({
+    
+    // Generate auto-save title if empty
+    const finalTitle = title.trim() || (() => {
+      const date = new Date();
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `auto-save[${day}-${month}/${hours}:${minutes}]`;
+    })();
+    
+    const mapData = {
       id: mindMap?.id || crypto.randomUUID(),
-      title,
+      title: finalTitle,
       centralConcept: nodes[0]?.text || '',
       nodes,
       tags: mindMap?.tags || [],
@@ -108,8 +122,51 @@ export const MindMapCanvas = ({ mindMap, onSave }: MindMapCanvasProps) => {
       folderId: mindMap?.folderId,
       createdAt: mindMap?.createdAt || now,
       updatedAt: now,
-    });
-  };
+    };
+    
+    onSave(mapData);
+    setHasManualSave(true);
+    setTimeout(() => setHasManualSave(false), 2000);
+  }, [title, nodes, mindMap, onSave]);
+
+  const handleAutoSave = useCallback(() => {
+    const now = new Date().toISOString();
+    
+    // Generate auto-save title if empty
+    const finalTitle = title.trim() || (() => {
+      const date = new Date();
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `auto-save[${day}-${month}/${hours}:${minutes}]`;
+    })();
+    
+    const mapData = {
+      id: mindMap?.id || crypto.randomUUID(),
+      title: finalTitle,
+      centralConcept: nodes[0]?.text || '',
+      nodes,
+      tags: mindMap?.tags || [],
+      priority: mindMap?.priority || 'medium',
+      folderId: mindMap?.folderId,
+      createdAt: mindMap?.createdAt || now,
+      updatedAt: now,
+    };
+    
+    if (onAutoSave) {
+      onAutoSave(mapData);
+    } else {
+      onSave(mapData);
+    }
+  }, [title, nodes, mindMap, onSave, onAutoSave]);
+
+  // Auto-save with debounce for text edits
+  const { isSaving } = useAutoSave({ title, nodes }, {
+    delay: 1500,
+    onSave: handleAutoSave,
+    enabled: true,
+  });
 
   const drawConnections = () => {
     return nodes
@@ -143,12 +200,26 @@ export const MindMapCanvas = ({ mindMap, onSave }: MindMapCanvasProps) => {
           placeholder="Título do Mapa Mental"
           className="max-w-md text-lg font-semibold"
         />
-        <div className="flex gap-2">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            {isSaving && (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Salvando...</span>
+              </>
+            )}
+            {hasManualSave && (
+              <>
+                <Check className="w-4 h-4 text-green-600" />
+                <span className="text-green-600">Salvo!</span>
+              </>
+            )}
+          </div>
           <Button variant="outline" onClick={() => handleAddNode(selectedNode || undefined)}>
             <Plus className="w-4 h-4 mr-2" />
             Adicionar Nó
           </Button>
-          <Button onClick={handleSave}>
+          <Button onClick={handleSave} disabled={isSaving}>
             <Save className="w-4 h-4 mr-2" />
             Salvar
           </Button>
