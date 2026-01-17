@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, X, Tag as TagIcon, Star } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { Plus, X, Tag as TagIcon, Star, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,10 +16,12 @@ import { KeywordDialog } from '@/components/dialogs/KeywordDialog';
 import { CornellNote as CornellNoteType, Keyword, Priority, Tag } from '@/types/study';
 import { useStudy } from '@/contexts/StudyContext';
 import { cn } from '@/lib/utils';
+import { useAutoSave } from '@/hooks/useAutoSave';
 
 interface CornellNoteEditorProps {
   note?: CornellNoteType;
   onSave: (note: CornellNoteType) => void;
+  onAutoSave?: (note: CornellNoteType) => void;
 }
 
 const priorityConfig: Record<Priority, { label: string; color: string; stars: number }> = {
@@ -29,9 +31,10 @@ const priorityConfig: Record<Priority, { label: string; color: string; stars: nu
   critical: { label: 'Crítica', color: 'bg-primary/20 text-primary', stars: 4 },
 };
 
-export const CornellNoteEditor = ({ note, onSave }: CornellNoteEditorProps) => {
+export const CornellNoteEditor = ({ note, onSave, onAutoSave }: CornellNoteEditorProps) => {
   const { tags, folders, selectedFolderId } = useStudy();
   const [showKeywordDialog, setShowKeywordDialog] = useState(false);
+  const [hasManualSave, setHasManualSave] = useState(false);
 
   const [formData, setFormData] = useState<Omit<CornellNoteType, 'id' | 'createdAt' | 'updatedAt'>>({
     title: note?.title || '',
@@ -70,15 +73,66 @@ export const CornellNoteEditor = ({ note, onSave }: CornellNoteEditorProps) => {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     const now = new Date().toISOString();
-    onSave({
+    
+    // Generate auto-save title if empty
+    const finalTitle = formData.title.trim() || (() => {
+      const date = new Date();
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `auto-save[${day}-${month}/${hours}:${minutes}]`;
+    })();
+    
+    const noteData = {
       ...formData,
+      title: finalTitle,
       id: note?.id || crypto.randomUUID(),
       createdAt: note?.createdAt || now,
       updatedAt: now,
-    });
-  };
+    };
+    
+    onSave(noteData);
+    setHasManualSave(true);
+    setTimeout(() => setHasManualSave(false), 2000);
+  }, [formData, note, onSave]);
+
+  const handleAutoSave = useCallback(() => {
+    const now = new Date().toISOString();
+    
+    // Generate auto-save title if empty
+    const finalTitle = formData.title.trim() || (() => {
+      const date = new Date();
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `auto-save[${day}-${month}/${hours}:${minutes}]`;
+    })();
+    
+    const noteData = {
+      ...formData,
+      title: finalTitle,
+      id: note?.id || crypto.randomUUID(),
+      createdAt: note?.createdAt || now,
+      updatedAt: now,
+    };
+    
+    if (onAutoSave) {
+      onAutoSave(noteData);
+    } else {
+      onSave(noteData);
+    }
+  }, [formData, note, onSave, onAutoSave]);
+
+  // Auto-save with debounce
+  const { isSaving } = useAutoSave(formData, {
+    delay: 2000,
+    onSave: handleAutoSave,
+    enabled: true,
+  });
 
   return (
     <div className="max-w-5xl mx-auto p-6">
@@ -271,8 +325,22 @@ export const CornellNoteEditor = ({ note, onSave }: CornellNoteEditorProps) => {
           </div>
         </div>
 
-        <div className="mt-6 flex justify-end">
-          <Button onClick={handleSave} size="lg">
+        <div className="mt-6 flex justify-between items-center">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            {isSaving && (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Salvando...</span>
+              </>
+            )}
+            {hasManualSave && (
+              <>
+                <Check className="w-4 h-4 text-green-600" />
+                <span className="text-green-600">Salvo!</span>
+              </>
+            )}
+          </div>
+          <Button onClick={handleSave} size="lg" disabled={isSaving}>
             Salvar Anotação
           </Button>
         </div>

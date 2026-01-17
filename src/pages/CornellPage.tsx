@@ -35,6 +35,15 @@ const CornellPage = () => {
     setEditingNote(undefined);
   };
 
+  const handleAutoSave = (note: CornellNote) => {
+    if (editingNote) {
+      updateCornellNote(note);
+    } else {
+      addCornellNote(note);
+      setEditingNote(note);
+    }
+  };
+
   if (isEditing) {
     return (
       <Layout>
@@ -46,7 +55,7 @@ const CornellPage = () => {
             Cancelar
           </Button>
         </div>
-        <CornellNoteEditor note={editingNote} onSave={handleSave} />
+        <CornellNoteEditor note={editingNote} onSave={handleSave} onAutoSave={handleAutoSave} />
       </Layout>
     );
   }
