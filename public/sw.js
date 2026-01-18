@@ -1,4 +1,4 @@
-const CACHE_NAME = 'brainbloom-v1';
+const CACHE_NAME = 'brainbloom-v2';
 const urlsToCache = [
   '/',
   '/index.html',

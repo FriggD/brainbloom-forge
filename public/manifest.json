@@ -2,7 +2,7 @@
   "name": "BrainBloom Forge",
   "short_name": "BrainBloom",
   "description": "Plataforma de gerenciamento de estudos",
-  "start_url": "/",
+  "start_url": "/?v=2",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#6366f1",
