@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { EventDialog } from '@/components/calendar/EventDialog';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const eventConfig = {
@@ -42,10 +42,11 @@ const CalendarPage = () => {
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
   const getEventsForDay = (day: Date) => {
+    const dayStr = format(day, 'yyyy-MM-dd');
     return events.filter(event => {
-      const start = new Date(event.start_date);
-      const end = event.end_date ? new Date(event.end_date) : start;
-      return day >= start && day <= end;
+      const eventStartStr = event.start_date.split('T')[0];
+      const eventEndStr = event.end_date ? event.end_date.split('T')[0] : eventStartStr;
+      return dayStr >= eventStartStr && dayStr <= eventEndStr;
     });
   };
 
@@ -83,6 +84,18 @@ const CalendarPage = () => {
             </Button>
           </div>
 
+          <div className="flex items-center gap-4 mb-6 pb-4 border-b">
+            {Object.entries(eventConfig).map(([key, config]) => {
+              const Icon = config.icon;
+              return (
+                <div key={key} className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded" style={{ backgroundColor: config.color }} />
+                  <span className="text-sm text-muted-foreground">{config.label}</span>
+                </div>
+              );
+            })}
+          </div>
+
           <div className="grid grid-cols-7 gap-2">
             {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
               <div key={day} className="text-center text-sm font-semibold text-muted-foreground py-2">
@@ -116,11 +129,15 @@ const CalendarPage = () => {
                       return (
                         <div
                           key={event.id}
-                          className="text-xs px-1.5 py-0.5 rounded flex items-center gap-1 truncate"
-                          style={{ backgroundColor: config.color + '20', color: config.color }}
+                          className="text-xs px-1.5 py-0.5 rounded flex items-center gap-1 truncate border"
+                          style={{ 
+                            backgroundColor: config.color + 'CC', 
+                            borderColor: config.color,
+                            color: '#ffffff'
+                          }}
                         >
                           <Icon className="w-3 h-3 shrink-0" />
-                          <span className="truncate">{event.subject || event.title}</span>
+                          <span className="truncate font-medium">{event.subject || event.title}</span>
                         </div>
                       );
                     })}
