@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, FileText } from 'lucide-react';
+import { Plus, FileText, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Layout } from '@/components/layout/Layout';
@@ -9,7 +9,7 @@ import { CornellNote } from '@/types/study';
 import { toast } from 'sonner';
 
 const CornellPage = () => {
-  const { cornellNotes, addCornellNote, updateCornellNote } = useStudy();
+  const { cornellNotes, addCornellNote, updateCornellNote, deleteCornellNote } = useStudy();
   const [isEditing, setIsEditing] = useState(false);
   const [editingNote, setEditingNote] = useState<CornellNote | undefined>(undefined);
 
@@ -41,6 +41,14 @@ const CornellPage = () => {
     } else {
       addCornellNote(note);
       setEditingNote(note);
+    }
+  };
+
+  const handleDelete = (e: React.MouseEvent, noteId: string) => {
+    e.stopPropagation();
+    if (confirm('Deseja realmente excluir esta anotação?')) {
+      deleteCornellNote(noteId);
+      toast.success('Anotação excluída!');
     }
   };
 
@@ -96,9 +104,17 @@ const CornellPage = () => {
             {cornellNotes.map((note) => (
               <Card
                 key={note.id}
-                className="hover:shadow-lg transition-all cursor-pointer group"
+                className="hover:shadow-lg transition-all cursor-pointer group relative"
                 onClick={() => handleEditNote(note)}
               >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                  onClick={(e) => handleDelete(e, note.id)}
+                >
+                  <Trash2 className="w-4 h-4 text-destructive" />
+                </Button>
                 <CardContent className="pt-6">
                   <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
                     {note.title}

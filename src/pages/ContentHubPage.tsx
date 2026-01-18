@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Plus, ExternalLink, Star, FolderOpen, Tag as TagIcon } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { BookOpen, Plus, ExternalLink, Star, FolderOpen, Tag as TagIcon, Trash2 } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStudy } from '@/contexts/StudyContext';
 import { CreateContentDialog } from '@/components/content-hub/CreateContentDialog';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 const typeConfig = {
   article: { label: 'Artigo', color: 'bg-blue-500' },
@@ -27,6 +28,7 @@ const priorityStars = {
 const ContentHubPage = () => {
   const { user } = useAuth();
   const { folders } = useStudy();
+  const queryClient = useQueryClient();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   const { data: contents = [] } = useQuery({
@@ -45,6 +47,27 @@ const ContentHubPage = () => {
     },
     enabled: !!user,
   });
+
+  const deleteContent = useMutation({
+    mutationFn: async (contentId: string) => {
+      const { error } = await supabase
+        .from('content_hub')
+        .delete()
+        .eq('id', contentId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['content-hub'] });
+      toast.success('Conteúdo excluído!');
+    },
+  });
+
+  const handleDelete = (e: React.MouseEvent, contentId: string) => {
+    e.stopPropagation();
+    if (confirm('Deseja realmente excluir este conteúdo?')) {
+      deleteContent.mutate(contentId);
+    }
+  };
 
   const getFolderName = (folderId: string | null) => {
     if (!folderId) return null;
@@ -91,7 +114,15 @@ const ContentHubPage = () => {
               const tags = content.content_hub_tags?.map((ct: any) => ct.tags) || [];
 
               return (
-                <Card key={content.id} className="flex flex-col">
+                <Card key={content.id} className="flex flex-col relative group">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                    onClick={(e) => handleDelete(e, content.id)}
+                  >
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
                   <CardHeader>
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <Badge className={typeInfo.color}>{typeInfo.label}</Badge>

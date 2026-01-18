@@ -104,16 +104,16 @@ const FlashcardsPage = () => {
     setShowGenerateAI(true);
   };
 
-  const handleAddGeneratedFlashcards = async (flashcards: { front: string; back: string }[]) => {
-    if (!generateForDeckId) return;
+  const handleAddGeneratedFlashcards = async (flashcards: { front: string; back: string }[], deckId?: string) => {
+    const targetDeckId = deckId || generateForDeckId;
+    if (!targetDeckId) return;
     for (const card of flashcards) {
-      await addFlashcard(generateForDeckId, card.front, card.back);
+      await addFlashcard(targetDeckId, card.front, card.back);
     }
-    // Refresh card counts
-    const cards = await getFlashcards(generateForDeckId);
-    setCardCounts((prev) => ({ ...prev, [generateForDeckId]: cards.length }));
-    // If editing this deck, refresh the cards
-    if (editingDeck?.id === generateForDeckId) {
+    await refreshDecks();
+    const cards = await getFlashcards(targetDeckId);
+    setCardCounts((prev) => ({ ...prev, [targetDeckId]: cards.length }));
+    if (editingDeck?.id === targetDeckId) {
       setEditingCards(cards);
     }
   };
@@ -223,19 +223,7 @@ const FlashcardsPage = () => {
       <GenerateFlashcardsDialog
         open={showGenerateAI}
         onOpenChange={(open) => { setShowGenerateAI(open); if (!open) setGenerateForDeckId(null); }}
-        onAddFlashcards={async (flashcards) => {
-          if (generateForDeckId) {
-            await handleAddGeneratedFlashcards(flashcards);
-          } else if (decks.length > 0) {
-            // If no specific deck, add to the first one or prompt to create
-            const targetDeckId = decks[0].id;
-            for (const card of flashcards) {
-              await addFlashcard(targetDeckId, card.front, card.back);
-            }
-            const cards = await getFlashcards(targetDeckId);
-            setCardCounts((prev) => ({ ...prev, [targetDeckId]: cards.length }));
-          }
-        }}
+        onAddFlashcards={handleAddGeneratedFlashcards}
       />
 
       <ImportCSVDialog

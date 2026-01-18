@@ -14,7 +14,12 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useAIStudyAssistant } from '@/hooks/useAIStudyAssistant';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 interface GeneratedFlashcard {
@@ -26,7 +31,7 @@ interface GeneratedFlashcard {
 interface GenerateFlashcardsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddFlashcards: (flashcards: { front: string; back: string }[]) => Promise<void>;
+  onAddFlashcards: (flashcards: { front: string; back: string }[], deckId?: string) => Promise<void>;
 }
 
 export const GenerateFlashcardsDialog = ({
@@ -34,11 +39,29 @@ export const GenerateFlashcardsDialog = ({
   onOpenChange,
   onAddFlashcards,
 }: GenerateFlashcardsDialogProps) => {
+  const { user } = useAuth();
   const [text, setText] = useState('');
   const [count, setCount] = useState(5);
   const [generatedCards, setGeneratedCards] = useState<GeneratedFlashcard[]>([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [deckOption, setDeckOption] = useState<'new' | 'existing'>('new');
+  const [newDeckName, setNewDeckName] = useState('');
+  const [selectedDeckId, setSelectedDeckId] = useState<string>('');
   const { generateFlashcards, isLoading } = useAIStudyAssistant();
+
+  const { data: decks = [] } = useQuery({
+    queryKey: ['flashcard-decks', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('flashcard_decks')
+        .select('id, title')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user && open,
+  });
 
   const handleGenerate = async () => {
     if (!text.trim()) {
@@ -68,12 +91,33 @@ export const GenerateFlashcardsDialog = ({
       return;
     }
 
+    if (deckOption === 'new' && !newDeckName.trim()) {
+      toast.error('Digite um nome para o novo deck');
+      return;
+    }
+
+    if (deckOption === 'existing' && !selectedDeckId) {
+      toast.error('Selecione um deck existente');
+      return;
+    }
+
     setIsAdding(true);
     try {
-      await onAddFlashcards(selectedCards.map(({ front, back }) => ({ front, back })));
+      if (deckOption === 'new') {
+        const { data: newDeck, error: deckError } = await supabase
+          .from('flashcard_decks')
+          .insert({ user_id: user?.id, title: newDeckName })
+          .select('id')
+          .single();
+        if (deckError) throw deckError;
+        await onAddFlashcards(selectedCards.map(({ front, back }) => ({ front, back })), newDeck.id);
+      } else {
+        await onAddFlashcards(selectedCards.map(({ front, back }) => ({ front, back })), selectedDeckId);
+      }
       toast.success(`${selectedCards.length} flashcards adicionados!`);
       handleClose();
     } catch (error) {
+      console.error(error);
       toast.error('Erro ao adicionar flashcards');
     } finally {
       setIsAdding(false);
@@ -84,6 +128,9 @@ export const GenerateFlashcardsDialog = ({
     setText('');
     setCount(5);
     setGeneratedCards([]);
+    setDeckOption('new');
+    setNewDeckName('');
+    setSelectedDeckId('');
     onOpenChange(false);
   };
 
@@ -133,7 +180,41 @@ export const GenerateFlashcardsDialog = ({
                 Gerar novos
               </Button>
             </div>
-            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+
+            <div className="space-y-3">
+              <Label>Salvar em:</Label>
+              <RadioGroup value={deckOption} onValueChange={(v) => setDeckOption(v as 'new' | 'existing')}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="new" id="new" />
+                  <Label htmlFor="new" className="font-normal cursor-pointer">Novo deck</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="existing" id="existing" />
+                  <Label htmlFor="existing" className="font-normal cursor-pointer">Deck existente</Label>
+                </div>
+              </RadioGroup>
+
+              {deckOption === 'new' ? (
+                <Input
+                  placeholder="Nome do novo deck"
+                  value={newDeckName}
+                  onChange={(e) => setNewDeckName(e.target.value)}
+                />
+              ) : (
+                <Select value={selectedDeckId} onValueChange={setSelectedDeckId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um deck" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {decks.map(deck => (
+                      <SelectItem key={deck.id} value={deck.id}>{deck.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
+            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
               {generatedCards.map((card, index) => (
                 <Card
                   key={index}

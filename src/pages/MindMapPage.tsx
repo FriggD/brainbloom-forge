@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Network } from 'lucide-react';
+import { Plus, Network, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Layout } from '@/components/layout/Layout';
@@ -9,7 +9,7 @@ import { MindMap } from '@/types/study';
 import { toast } from 'sonner';
 
 const MindMapPage = () => {
-  const { mindMaps, addMindMap, updateMindMap } = useStudy();
+  const { mindMaps, addMindMap, updateMindMap, deleteMindMap } = useStudy();
   const [isEditing, setIsEditing] = useState(false);
   const [editingMindMap, setEditingMindMap] = useState<MindMap | undefined>(undefined);
 
@@ -41,6 +41,14 @@ const MindMapPage = () => {
     } else {
       addMindMap(mindMap);
       setEditingMindMap(mindMap);
+    }
+  };
+
+  const handleDelete = (e: React.MouseEvent, mapId: string) => {
+    e.stopPropagation();
+    if (confirm('Deseja realmente excluir este mapa mental?')) {
+      deleteMindMap(mapId);
+      toast.success('Mapa mental excluído!');
     }
   };
 
@@ -100,9 +108,17 @@ const MindMapPage = () => {
             {mindMaps.map((mindMap) => (
               <Card
                 key={mindMap.id}
-                className="hover:shadow-lg transition-all cursor-pointer group"
+                className="hover:shadow-lg transition-all cursor-pointer group relative"
                 onClick={() => handleEditMindMap(mindMap)}
               >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                  onClick={(e) => handleDelete(e, mindMap.id)}
+                >
+                  <Trash2 className="w-4 h-4 text-destructive" />
+                </Button>
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-2 mb-3">
                     <Network className="w-5 h-5 text-primary" />
