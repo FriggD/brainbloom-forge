@@ -14,14 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      content_hub: {
-        Row: {
-          created_at: string
-          description: string | null
-          folder_id: string | null
-          id: string
-          link: string
-          priority: string
       calendar_events: {
         Row: {
           created_at: string
@@ -36,17 +28,52 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          description?: string | null
-          folder_id?: string | null
-          id?: string
-          link: string
-          priority?: string
           end_date?: string | null
           id?: string
           start_date: string
           subject?: string | null
           title: string
+          type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          start_date?: string
+          subject?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      content_hub: {
+        Row: {
+          created_at: string
+          description: string | null
+          folder_id: string | null
+          id: string
+          is_read: boolean
+          link: string
+          priority: string
+          title: string
           type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          folder_id?: string | null
+          id?: string
+          is_read?: boolean
+          link: string
+          priority?: string
+          title: string
+          type?: string
           updated_at?: string
           user_id: string
         }
@@ -55,12 +82,9 @@ export type Database = {
           description?: string | null
           folder_id?: string | null
           id?: string
+          is_read?: boolean
           link?: string
           priority?: string
-          end_date?: string | null
-          id?: string
-          start_date?: string
-          subject?: string | null
           title?: string
           type?: string
           updated_at?: string
@@ -108,7 +132,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-        Relationships: []
       }
       cornell_note_tags: {
         Row: {
