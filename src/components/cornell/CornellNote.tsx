@@ -17,6 +17,8 @@ import { CornellNote as CornellNoteType, Keyword, Priority, Tag } from '@/types/
 import { useStudy } from '@/contexts/StudyContext';
 import { cn } from '@/lib/utils';
 import { useAutoSave } from '@/hooks/useAutoSave';
+import { AISummarizeButton } from '@/components/ai/AISummarizeButton';
+import { AISuggestKeywordsButton } from '@/components/ai/AISuggestKeywordsButton';
 
 interface CornellNoteEditorProps {
   note?: CornellNoteType;
@@ -184,14 +186,25 @@ export const CornellNoteEditor = ({ note, onSave, onAutoSave }: CornellNoteEdito
               <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
                 Palavras-Chave
               </h3>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={() => setShowKeywordDialog(true)}
-              >
-                <Plus className="w-4 h-4" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <AISuggestKeywordsButton
+                  text={formData.mainNotes}
+                  onKeywordsGenerated={(keywords) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      keywords: [...prev.keywords, ...keywords],
+                    }));
+                  }}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => setShowKeywordDialog(true)}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               {formData.keywords.length === 0 ? (
@@ -234,9 +247,17 @@ export const CornellNoteEditor = ({ note, onSave, onAutoSave }: CornellNoteEdito
 
         {/* Summary Section */}
         <div className="border-t border-border p-4 bg-muted/30">
-          <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-3">
-            Resumo
-          </h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
+              Resumo
+            </h3>
+            <AISummarizeButton
+              text={formData.mainNotes}
+              onSummaryGenerated={(summary) => {
+                setFormData(prev => ({ ...prev, summary }));
+              }}
+            />
+          </div>
           <Textarea
             value={formData.summary}
             onChange={(e) => setFormData((prev) => ({ ...prev, summary: e.target.value }))}
