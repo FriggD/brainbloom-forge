@@ -22,6 +22,13 @@ export type Database = {
           id: string
           link: string
           priority: string
+      calendar_events: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          start_date: string
+          subject: string | null
           title: string
           type: string
           updated_at: string
@@ -34,6 +41,10 @@ export type Database = {
           id?: string
           link: string
           priority?: string
+          end_date?: string | null
+          id?: string
+          start_date: string
+          subject?: string | null
           title: string
           type: string
           updated_at?: string
@@ -46,6 +57,10 @@ export type Database = {
           id?: string
           link?: string
           priority?: string
+          end_date?: string | null
+          id?: string
+          start_date?: string
+          subject?: string | null
           title?: string
           type?: string
           updated_at?: string
@@ -93,6 +108,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+        Relationships: []
       }
       cornell_note_tags: {
         Row: {

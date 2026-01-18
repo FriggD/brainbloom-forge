@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, RotateCcw, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Flashcard } from '@/types/flashcard';
@@ -10,11 +10,26 @@ interface FlashcardViewerProps {
   onClose: () => void;
 }
 
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
 export const FlashcardViewer = ({ cards, onClose }: FlashcardViewerProps) => {
+  const [shuffledCards, setShuffledCards] = useState<Flashcard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
 
-  if (cards.length === 0) {
+  useEffect(() => {
+    setShuffledCards(shuffleArray(cards));
+  }, [cards]);
+
+  if (shuffledCards.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-8">
         <p className="text-muted-foreground mb-4">Nenhum flashcard neste deck.</p>
@@ -25,31 +40,50 @@ export const FlashcardViewer = ({ cards, onClose }: FlashcardViewerProps) => {
     );
   }
 
-  const currentCard = cards[currentIndex];
+  const currentCard = shuffledCards[currentIndex];
 
   const goNext = () => {
     setIsFlipped(false);
-    setCurrentIndex((prev) => (prev + 1) % cards.length);
+    setCurrentIndex((prev) => (prev + 1) % shuffledCards.length);
   };
 
   const goPrev = () => {
     setIsFlipped(false);
-    setCurrentIndex((prev) => (prev - 1 + cards.length) % cards.length);
+    setCurrentIndex((prev) => (prev - 1 + shuffledCards.length) % shuffledCards.length);
   };
 
   const restart = () => {
     setIsFlipped(false);
     setCurrentIndex(0);
+    setShuffledCards(shuffleArray(cards));
   };
 
   return (
-    <div className="flex flex-col items-center gap-6 p-4">
-      <div className="text-sm text-muted-foreground">
-        {currentIndex + 1} / {cards.length}
-      </div>
+    <div className={cn(
+      "flex flex-col items-center gap-6 transition-all",
+      focusMode ? "p-0 min-h-screen justify-center" : "p-4 md:p-8"
+    )}>
+      {!focusMode && (
+        <div className="flex items-center gap-4 w-full max-w-xl justify-between">
+          <div className="text-sm text-muted-foreground">
+            {currentIndex + 1} / {shuffledCards.length}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setFocusMode(!focusMode)}
+          >
+            <Eye className="w-4 h-4 mr-2" />
+            Modo Foco
+          </Button>
+        </div>
+      )}
 
       <div
-        className="perspective-1000 w-full max-w-xl cursor-pointer"
+        className={cn(
+          "perspective-1000 cursor-pointer transition-all",
+          focusMode ? "w-full max-w-4xl" : "w-full max-w-xl"
+        )}
         onClick={() => setIsFlipped(!isFlipped)}
         style={{ perspective: '1000px' }}
       >
@@ -67,31 +101,39 @@ export const FlashcardViewer = ({ cards, onClose }: FlashcardViewerProps) => {
           {/* Front */}
           <Card
             className={cn(
-              'absolute inset-0 w-full min-h-[300px] p-6 flex items-center justify-center',
-              'backface-hidden bg-card border-2'
+              'absolute inset-0 w-full p-8 md:p-12 flex items-center justify-center',
+              'backface-hidden bg-card border-2',
+              focusMode ? 'min-h-[400px] md:min-h-[500px]' : 'min-h-[300px]'
             )}
             style={{ backfaceVisibility: 'hidden' }}
           >
-            <p className="text-lg text-center whitespace-pre-wrap">{currentCard.front}</p>
+            <p className={cn(
+              "text-center whitespace-pre-wrap",
+              focusMode ? "text-2xl md:text-3xl" : "text-lg md:text-xl"
+            )}>{currentCard.front}</p>
           </Card>
 
           {/* Back */}
           <Card
             className={cn(
-              'w-full min-h-[300px] p-6 flex items-center justify-center',
-              'backface-hidden bg-primary/10 border-2 border-primary/30'
+              'w-full p-8 md:p-12 flex items-center justify-center',
+              'backface-hidden bg-primary/10 border-2 border-primary/30',
+              focusMode ? 'min-h-[400px] md:min-h-[500px]' : 'min-h-[300px]'
             )}
             style={{
               backfaceVisibility: 'hidden',
               transform: 'rotateY(180deg)',
             }}
           >
-            <p className="text-lg text-center whitespace-pre-wrap">{currentCard.back}</p>
+            <p className={cn(
+              "text-center whitespace-pre-wrap",
+              focusMode ? "text-2xl md:text-3xl" : "text-lg md:text-xl"
+            )}>{currentCard.back}</p>
           </Card>
         </div>
       </div>
 
-      <p className="text-sm text-muted-foreground">Clique no card para virar</p>
+      {!focusMode && <p className="text-sm text-muted-foreground">Clique no card para virar</p>}
 
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" onClick={goPrev}>
@@ -105,9 +147,21 @@ export const FlashcardViewer = ({ cards, onClose }: FlashcardViewerProps) => {
         </Button>
       </div>
 
-      <Button variant="ghost" onClick={onClose}>
-        Fechar estudo
-      </Button>
+      {focusMode ? (
+        <div className="flex items-center gap-4">
+          <Button variant="outline" onClick={() => setFocusMode(false)}>
+            <EyeOff className="w-4 h-4 mr-2" />
+            Sair do Foco
+          </Button>
+          <Button variant="ghost" onClick={onClose}>
+            Fechar estudo
+          </Button>
+        </div>
+      ) : (
+        <Button variant="ghost" onClick={onClose}>
+          Fechar estudo
+        </Button>
+      )}
     </div>
   );
 };
