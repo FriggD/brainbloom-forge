@@ -5,6 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useStudy } from '@/contexts/StudyContext';
 import { Layout } from '@/components/layout/Layout';
 import { UpcomingEventsCard } from '@/components/calendar/UpcomingEventsCard';
+import { PomodoroTimer } from '@/components/pomodoro/PomodoroTimer';
+import { StudyStats } from '@/components/stats/StudyStats';
+import { QuickReview } from '@/components/review/QuickReview';
+import { useStudyStreak } from '@/hooks/useStudyStreak';
 import { useState, useEffect } from 'react';
 
 const features = [
@@ -41,6 +45,7 @@ const features = [
 const Index = () => {
   const { cornellNotes, mindMaps, folders } = useStudy();
   const [nickname, setNickname] = useState('StudyHub');
+  useStudyStreak();
 
   useEffect(() => {
     const saved = localStorage.getItem('userProfile');
@@ -71,15 +76,14 @@ const Index = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-          {stats.map((stat) => (
-            <Card key={stat.label} className="bg-card">
-              <CardContent className="pt-6">
-                <div className="text-3xl font-bold text-primary mb-1">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="mb-12">
+          <StudyStats />
+        </div>
+
+        {/* Pomodoro Timer */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+          <PomodoroTimer />
+          <QuickReview />
         </div>
 
         {/* Upcoming Events */}
