@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   FolderOpen, 
   FileText, 
@@ -24,6 +24,7 @@ import { GlobalSearchDialog } from '@/components/search/GlobalSearchDialog';
 
 export const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { folders, setSelectedFolderId, selectedFolderId } = useStudy();
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['1']));
   const [showCreateFolder, setShowCreateFolder] = useState(false);
@@ -181,7 +182,10 @@ export const Sidebar = () => {
                     </button>
                     <FolderOpen className="w-4 h-4 text-primary" />
                     <span
-                      onClick={() => setSelectedFolderId(folder.id)}
+                      onClick={() => {
+                        setSelectedFolderId(folder.id);
+                        navigate(`/folder/${folder.id}`);
+                      }}
                       className="flex-1"
                     >
                       {folder.name}
@@ -192,7 +196,10 @@ export const Sidebar = () => {
                       {getSubfolders(folder.id).map((subfolder) => (
                         <div
                           key={subfolder.id}
-                          onClick={() => setSelectedFolderId(subfolder.id)}
+                          onClick={() => {
+                            setSelectedFolderId(subfolder.id);
+                            navigate(`/folder/${subfolder.id}`);
+                          }}
                           className={cn(
                             'flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer text-sm transition-colors',
                             selectedFolderId === subfolder.id
@@ -217,7 +224,10 @@ export const Sidebar = () => {
             {rootFolders.map((folder) => (
               <button
                 key={folder.id}
-                onClick={() => setSelectedFolderId(folder.id)}
+                onClick={() => {
+                  setSelectedFolderId(folder.id);
+                  navigate(`/folder/${folder.id}`);
+                }}
                 className={cn(
                   'w-full flex items-center justify-center px-2 py-2 rounded-lg transition-colors',
                   selectedFolderId === folder.id

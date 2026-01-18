@@ -16,6 +16,7 @@ import SettingsPage from "./pages/SettingsPage";
 import ThemeSettingsPage from "./pages/ThemeSettingsPage";
 import ProfileSettingsPage from "./pages/ProfileSettingsPage";
 import CalendarSettingsPage from "./pages/CalendarSettingsPage";
+import FolderViewPage from "./pages/FolderViewPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
@@ -51,6 +52,7 @@ const App = () => (
               <Routes>
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                <Route path="/folder/:folderId" element={<ProtectedRoute><FolderViewPage /></ProtectedRoute>} />
                 <Route path="/cornell" element={<ProtectedRoute><CornellPage /></ProtectedRoute>} />
                 <Route path="/mindmap" element={<ProtectedRoute><MindMapPage /></ProtectedRoute>} />
                 <Route path="/flashcards" element={<ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
