@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Layers, Play, Edit2, Trash2, Upload, FolderOpen } from 'lucide-react';
+import { Layers, Play, Edit2, Trash2, Upload, FolderOpen, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,13 +17,14 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
-interface DeckCardProps {
+export interface DeckCardProps {
   deck: FlashcardDeck;
   cardCount: number;
   onStudy: () => void;
   onEdit: () => void;
   onDelete: () => void;
   onImport: () => void;
+  onGenerateAI?: () => void;
 }
 
 export const DeckCard = ({
@@ -33,6 +34,7 @@ export const DeckCard = ({
   onEdit,
   onDelete,
   onImport,
+  onGenerateAI,
 }: DeckCardProps) => {
   const { folders } = useStudy();
   const folder = folders.find((f) => f.id === deck.folderId);
@@ -99,7 +101,7 @@ export const DeckCard = ({
           </div>
         )}
 
-        <div className="grid grid-cols-3 gap-2 pt-2">
+        <div className="grid grid-cols-2 gap-2 pt-2">
           <Button size="sm" onClick={onStudy} disabled={cardCount === 0} className="w-full px-1 sm:px-2">
             <Play className="w-4 h-4" />
             <span className="hidden xl:inline ml-1">Estudar</span>
@@ -108,10 +110,18 @@ export const DeckCard = ({
             <Edit2 className="w-4 h-4" />
             <span className="hidden xl:inline ml-1">Editar</span>
           </Button>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
           <Button size="sm" variant="outline" onClick={onImport} className="w-full px-1 sm:px-2">
             <Upload className="w-4 h-4" />
             <span className="hidden xl:inline ml-1">Importar</span>
           </Button>
+          {onGenerateAI && (
+            <Button size="sm" variant="outline" onClick={onGenerateAI} className="w-full px-1 sm:px-2">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="hidden xl:inline ml-1">IA</span>
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Layers } from 'lucide-react';
+import { Plus, Layers, Sparkles } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { ImportCSVDialog } from '@/components/flashcards/ImportCSVDialog';
 import { FlashcardViewer } from '@/components/flashcards/FlashcardViewer';
 import { FlashcardEditor } from '@/components/flashcards/FlashcardEditor';
 import { QuickReviewCarousel } from '@/components/flashcards/QuickReviewCarousel';
+import { GenerateFlashcardsDialog } from '@/components/ai/GenerateFlashcardsDialog';
 import { Flashcard, FlashcardDeck } from '@/types/flashcard';
 import {
   Dialog,
@@ -41,6 +42,8 @@ const FlashcardsPage = () => {
   const [editingCards, setEditingCards] = useState<Flashcard[]>([]);
   const [cardCounts, setCardCounts] = useState<Record<string, number>>({});
   const [allCards, setAllCards] = useState<Flashcard[]>([]);
+  const [showGenerateAI, setShowGenerateAI] = useState(false);
+  const [generateForDeckId, setGenerateForDeckId] = useState<string | null>(null);
 
   // Fetch card counts for all decks and all cards for quick review
   useEffect(() => {
@@ -96,6 +99,25 @@ const FlashcardsPage = () => {
     setCardCounts((prev) => ({ ...prev, [editingDeck.id]: cards.length }));
   };
 
+  const handleGenerateWithAI = (deckId: string) => {
+    setGenerateForDeckId(deckId);
+    setShowGenerateAI(true);
+  };
+
+  const handleAddGeneratedFlashcards = async (flashcards: { front: string; back: string }[]) => {
+    if (!generateForDeckId) return;
+    for (const card of flashcards) {
+      await addFlashcard(generateForDeckId, card.front, card.back);
+    }
+    // Refresh card counts
+    const cards = await getFlashcards(generateForDeckId);
+    setCardCounts((prev) => ({ ...prev, [generateForDeckId]: cards.length }));
+    // If editing this deck, refresh the cards
+    if (editingDeck?.id === generateForDeckId) {
+      setEditingCards(cards);
+    }
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -137,10 +159,16 @@ const FlashcardsPage = () => {
               Crie e estude seus flashcards
             </p>
           </div>
-          <Button onClick={() => setShowCreateDeck(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Deck
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => { setGenerateForDeckId(null); setShowGenerateAI(true); }}>
+              <Sparkles className="w-4 h-4 mr-2" />
+              Gerar com IA
+            </Button>
+            <Button onClick={() => setShowCreateDeck(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Deck
+            </Button>
+          </div>
         </div>
 
         {decks.length === 0 ? (
@@ -177,6 +205,7 @@ const FlashcardsPage = () => {
                     onEdit={() => handleEdit(deck)}
                     onDelete={() => deleteDeck(deck.id)}
                     onImport={() => setImportDeckId(deck.id)}
+                    onGenerateAI={() => handleGenerateWithAI(deck.id)}
                   />
                 ))}
               </div>
@@ -189,6 +218,24 @@ const FlashcardsPage = () => {
         open={showCreateDeck}
         onOpenChange={setShowCreateDeck}
         onSubmit={handleCreateDeck}
+      />
+
+      <GenerateFlashcardsDialog
+        open={showGenerateAI}
+        onOpenChange={(open) => { setShowGenerateAI(open); if (!open) setGenerateForDeckId(null); }}
+        onAddFlashcards={async (flashcards) => {
+          if (generateForDeckId) {
+            await handleAddGeneratedFlashcards(flashcards);
+          } else if (decks.length > 0) {
+            // If no specific deck, add to the first one or prompt to create
+            const targetDeckId = decks[0].id;
+            for (const card of flashcards) {
+              await addFlashcard(targetDeckId, card.front, card.back);
+            }
+            const cards = await getFlashcards(targetDeckId);
+            setCardCounts((prev) => ({ ...prev, [targetDeckId]: cards.length }));
+          }
+        }}
       />
 
       <ImportCSVDialog
