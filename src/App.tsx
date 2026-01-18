@@ -11,6 +11,7 @@ import CornellPage from "./pages/CornellPage";
 import MindMapPage from "./pages/MindMapPage";
 import FlashcardsPage from "./pages/FlashcardsPage";
 import CalendarPage from "./pages/CalendarPage";
+import ContentHubPage from "./pages/ContentHubPage";
 import SettingsPage from "./pages/SettingsPage";
 import ThemeSettingsPage from "./pages/ThemeSettingsPage";
 import ProfileSettingsPage from "./pages/ProfileSettingsPage";
@@ -54,6 +55,7 @@ const App = () => (
                 <Route path="/mindmap" element={<ProtectedRoute><MindMapPage /></ProtectedRoute>} />
                 <Route path="/flashcards" element={<ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
                 <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
+                <Route path="/content-hub" element={<ProtectedRoute><ContentHubPage /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="/settings/theme" element={<ProtectedRoute><ThemeSettingsPage /></ProtectedRoute>} />
               <Route path="/settings/profile" element={<ProtectedRoute><ProfileSettingsPage /></ProtectedRoute>} />
