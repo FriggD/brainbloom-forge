@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   FolderOpen, 
@@ -14,10 +14,12 @@ import {
   Menu,
   X,
   Calendar,
-  BookOpen
+  BookOpen,
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStudy } from '@/contexts/StudyContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { CreateFolderDialog } from '@/components/dialogs/CreateFolderDialog';
 import { GlobalSearchDialog } from '@/components/search/GlobalSearchDialog';
@@ -25,12 +27,14 @@ import { GlobalSearchDialog } from '@/components/search/GlobalSearchDialog';
 export const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const { folders, setSelectedFolderId, selectedFolderId } = useStudy();
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['1']));
   const [showCreateFolder, setShowCreateFolder] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [profile, setProfile] = useState({ nickname: 'StudyHub', course: '', profession: '', avatarSeed: '' });
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const sidebarRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('userProfile');
@@ -44,6 +48,21 @@ export const Sidebar = () => {
       });
     }
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!isCollapsed && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+        setIsCollapsed(true);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isCollapsed]);
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/auth');
+  };
 
   const toggleFolder = (folderId: string) => {
     setExpandedFolders((prev) => {
@@ -75,7 +94,7 @@ export const Sidebar = () => {
   const subtitle = profile.course || profile.profession;
 
   return (
-    <aside className={cn(
+    <aside ref={sidebarRef} className={cn(
       "h-screen bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-300",
       isCollapsed ? "w-16" : "w-64"
     )}>
@@ -129,6 +148,7 @@ export const Sidebar = () => {
             <Link
               key={item.path}
               to={item.path}
+              onClick={() => setIsCollapsed(true)}
               className={cn(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                 location.pathname === item.path
@@ -242,9 +262,10 @@ export const Sidebar = () => {
         )}
       </nav>
 
-      <div className="p-3 border-t border-sidebar-border">
+      <div className="p-3 border-t border-sidebar-border space-y-1">
         <Link
           to="/settings"
+          onClick={() => setIsCollapsed(true)}
           className={cn(
             "flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground hover:bg-sidebar-accent transition-colors",
             isCollapsed && "justify-center px-2"
@@ -253,6 +274,16 @@ export const Sidebar = () => {
           <Settings className="w-4 h-4" />
           {!isCollapsed && 'Configurações'}
         </Link>
+        <button
+          onClick={handleLogout}
+          className={cn(
+            "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive transition-colors",
+            isCollapsed && "justify-center px-2"
+          )}
+        >
+          <LogOut className="w-4 h-4" />
+          {!isCollapsed && 'Sair'}
+        </button>
       </div>
 
       <CreateFolderDialog open={showCreateFolder} onOpenChange={setShowCreateFolder} />
