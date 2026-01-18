@@ -1,4 +1,4 @@
-import { Settings as SettingsIcon, Palette, User } from 'lucide-react';
+import { Settings as SettingsIcon, Palette, User, Calendar } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +20,13 @@ const SettingsPage = () => {
       description: 'Gerencie suas informações pessoais',
       icon: User,
       path: '/settings/profile',
+    },
+    {
+      id: 'calendar',
+      title: 'Calendário',
+      description: 'Configure suas datas importantes',
+      icon: Calendar,
+      path: '/settings/calendar',
     },
   ];
 

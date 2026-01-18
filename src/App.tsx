@@ -10,9 +10,11 @@ import Index from "./pages/Index";
 import CornellPage from "./pages/CornellPage";
 import MindMapPage from "./pages/MindMapPage";
 import FlashcardsPage from "./pages/FlashcardsPage";
+import CalendarPage from "./pages/CalendarPage";
 import SettingsPage from "./pages/SettingsPage";
 import ThemeSettingsPage from "./pages/ThemeSettingsPage";
 import ProfileSettingsPage from "./pages/ProfileSettingsPage";
+import CalendarSettingsPage from "./pages/CalendarSettingsPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
@@ -51,9 +53,11 @@ const App = () => (
                 <Route path="/cornell" element={<ProtectedRoute><CornellPage /></ProtectedRoute>} />
                 <Route path="/mindmap" element={<ProtectedRoute><MindMapPage /></ProtectedRoute>} />
                 <Route path="/flashcards" element={<ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
+                <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="/settings/theme" element={<ProtectedRoute><ThemeSettingsPage /></ProtectedRoute>} />
               <Route path="/settings/profile" element={<ProtectedRoute><ProfileSettingsPage /></ProtectedRoute>} />
+              <Route path="/settings/calendar" element={<ProtectedRoute><CalendarSettingsPage /></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </StudyProvider>
