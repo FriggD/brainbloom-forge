@@ -46,7 +46,7 @@ export const GenerateFlashcardsDialog = ({
   const [isAdding, setIsAdding] = useState(false);
   const [deckOption, setDeckOption] = useState<'new' | 'existing'>('new');
   const [newDeckName, setNewDeckName] = useState('');
-  const [selectedDeckId, setSelectedDeckId] = useState<string>('');
+  const [selectedDeckId, setSelectedDeckId] = useState<string>('none');
   const { generateFlashcards, isLoading } = useAIStudyAssistant();
 
   const { data: decks = [] } = useQuery({
@@ -96,7 +96,7 @@ export const GenerateFlashcardsDialog = ({
       return;
     }
 
-    if (deckOption === 'existing' && !selectedDeckId) {
+    if (deckOption === 'existing' && (!selectedDeckId || selectedDeckId === 'none')) {
       toast.error('Selecione um deck existente');
       return;
     }
@@ -130,7 +130,7 @@ export const GenerateFlashcardsDialog = ({
     setGeneratedCards([]);
     setDeckOption('new');
     setNewDeckName('');
-    setSelectedDeckId('');
+    setSelectedDeckId('none');
     onOpenChange(false);
   };
 
@@ -206,6 +206,7 @@ export const GenerateFlashcardsDialog = ({
                     <SelectValue placeholder="Selecione um deck" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">Selecione um deck</SelectItem>
                     {decks.map(deck => (
                       <SelectItem key={deck.id} value={deck.id}>{deck.title}</SelectItem>
                     ))}

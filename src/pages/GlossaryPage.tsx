@@ -231,12 +231,12 @@ export default function GlossaryPage() {
                 </div>
                 <div>
                   <Label htmlFor="folder">Pasta (opcional)</Label>
-                  <Select value={newFolderId || ''} onValueChange={(v) => setNewFolderId(v || null)}>
+                  <Select value={newFolderId || 'none'} onValueChange={(v) => setNewFolderId(v === 'none' ? null : v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione uma pasta" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Sem pasta</SelectItem>
+                      <SelectItem value="none">Sem pasta</SelectItem>
                       {allFolders.map(folder => (
                         <SelectItem key={folder.id} value={folder.id}>
                           {getFolderPath(folder.id)}
@@ -264,13 +264,13 @@ export default function GlossaryPage() {
               className="pl-10"
             />
           </div>
-          <Select value={filterFolderId || ''} onValueChange={(v) => setFilterFolderId(v || null)}>
+          <Select value={filterFolderId || 'all'} onValueChange={(v) => setFilterFolderId(v === 'all' ? null : v)}>
             <SelectTrigger className="w-[200px]">
               <FolderOpen className="w-4 h-4 mr-2" />
               <SelectValue placeholder="Todas as pastas" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas as pastas</SelectItem>
+              <SelectItem value="all">Todas as pastas</SelectItem>
               {allFolders.map(folder => (
                 <SelectItem key={folder.id} value={folder.id}>
                   {getFolderPath(folder.id)}
@@ -414,14 +414,14 @@ export default function GlossaryPage() {
                 <div>
                   <Label htmlFor="edit-folder">Pasta (opcional)</Label>
                   <Select 
-                    value={editingTerm.folder_id || ''} 
-                    onValueChange={(v) => setEditingTerm({ ...editingTerm, folder_id: v || null })}
+                    value={editingTerm.folder_id || 'none'} 
+                    onValueChange={(v) => setEditingTerm({ ...editingTerm, folder_id: v === 'none' ? null : v })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione uma pasta" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Sem pasta</SelectItem>
+                      <SelectItem value="none">Sem pasta</SelectItem>
                       {allFolders.map(folder => (
                         <SelectItem key={folder.id} value={folder.id}>
                           {getFolderPath(folder.id)}
