@@ -363,6 +363,44 @@ export type Database = {
           },
         ]
       }
+      glossary: {
+        Row: {
+          created_at: string
+          definition: string
+          folder_id: string | null
+          id: string
+          term: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          definition: string
+          folder_id?: string | null
+          id?: string
+          term: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          definition?: string
+          folder_id?: string | null
+          id?: string
+          term?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "glossary_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mind_map_tags: {
         Row: {
           id: string

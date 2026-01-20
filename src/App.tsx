@@ -12,6 +12,7 @@ import MindMapPage from "./pages/MindMapPage";
 import FlashcardsPage from "./pages/FlashcardsPage";
 import CalendarPage from "./pages/CalendarPage";
 import ContentHubPage from "./pages/ContentHubPage";
+import GlossaryPage from "./pages/GlossaryPage";
 import SettingsPage from "./pages/SettingsPage";
 import ThemeSettingsPage from "./pages/ThemeSettingsPage";
 import ProfileSettingsPage from "./pages/ProfileSettingsPage";
@@ -58,6 +59,7 @@ const App = () => (
                 <Route path="/flashcards" element={<ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
                 <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
                 <Route path="/content-hub" element={<ProtectedRoute><ContentHubPage /></ProtectedRoute>} />
+                <Route path="/glossary" element={<ProtectedRoute><GlossaryPage /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="/settings/theme" element={<ProtectedRoute><ThemeSettingsPage /></ProtectedRoute>} />
               <Route path="/settings/profile" element={<ProtectedRoute><ProfileSettingsPage /></ProtectedRoute>} />

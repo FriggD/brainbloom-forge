@@ -6,89 +6,43 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useStudy } from '@/contexts/StudyContext';
 import { toast } from 'sonner';
 
+interface PomodoroSettings {
+  work_duration: number;
+  short_break: number;
+  long_break: number;
+  sessions_until_long_break: number;
+}
+
+const DEFAULT_SETTINGS: PomodoroSettings = {
+  work_duration: 25,
+  short_break: 5,
+  long_break: 15,
+  sessions_until_long_break: 4,
+};
+
 export const PomodoroTimer = () => {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-  const [minutes, setMinutes] = useState(25);
+  const { folders } = useStudy();
+  const [settings, setSettings] = useState<PomodoroSettings>(() => {
+    const saved = localStorage.getItem('pomodoroSettings');
+    return saved ? JSON.parse(saved) : DEFAULT_SETTINGS;
+  });
+  const [minutes, setMinutes] = useState(settings.work_duration);
   const [seconds, setSeconds] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [mode, setMode] = useState<'work' | 'short' | 'long'>('work');
   const [sessionCount, setSessionCount] = useState(0);
   const [selectedFolder, setSelectedFolder] = useState<string>('');
   const [subject, setSubject] = useState('');
-  const [sessionStart, setSessionStart] = useState<Date | null>(null);
-
-  const { data: settings } = useQuery({
-    queryKey: ['pomodoro-settings', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('pomodoro_settings')
-        .select('*')
-        .eq('user_id', user?.id)
-        .single();
-      if (error && error.code !== 'PGRST116') throw error;
-      return data || { work_duration: 25, short_break: 5, long_break: 15, sessions_until_long_break: 4 };
-    },
-    enabled: !!user,
-  });
-
-  const { data: folders = [] } = useQuery({
-    queryKey: ['folders', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('folders')
-        .select('*')
-        .eq('user_id', user?.id);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user,
-  });
-
-  const saveSession = useMutation({
-    mutationFn: async (duration: number) => {
-      const { error } = await supabase.from('study_sessions').insert({
-        user_id: user?.id,
-        folder_id: selectedFolder || null,
-        subject: subject || null,
-        duration,
-        started_at: sessionStart,
-        ended_at: new Date(),
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['study-sessions'] });
-      queryClient.invalidateQueries({ queryKey: ['study-stats'] });
-    },
-  });
-
-  const updateSettings = useMutation({
-    mutationFn: async (newSettings: any) => {
-      const { error } = await supabase
-        .from('pomodoro_settings')
-        .upsert({ user_id: user?.id, ...newSettings, updated_at: new Date() });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pomodoro-settings'] });
-      toast.success('Configurações salvas!');
-    },
-  });
 
   useEffect(() => {
-    if (settings) {
-      setMinutes(settings.work_duration);
-    }
+    localStorage.setItem('pomodoroSettings', JSON.stringify(settings));
   }, [settings]);
 
   useEffect(() => {
-    let interval: any = null;
+    let interval: NodeJS.Timeout | null = null;
     if (isActive && (minutes > 0 || seconds > 0)) {
       interval = setInterval(() => {
         if (seconds === 0) {
@@ -103,46 +57,51 @@ export const PomodoroTimer = () => {
         }
       }, 1000);
     }
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [isActive, minutes, seconds]);
 
   const handleTimerComplete = () => {
     setIsActive(false);
-    if (mode === 'work' && sessionStart) {
-      const duration = settings?.work_duration || 25;
-      saveSession.mutate(duration);
+    if (mode === 'work') {
       setSessionCount(sessionCount + 1);
       
-      if (sessionCount + 1 >= (settings?.sessions_until_long_break || 4)) {
+      if (sessionCount + 1 >= settings.sessions_until_long_break) {
         setMode('long');
-        setMinutes(settings?.long_break || 15);
+        setMinutes(settings.long_break);
         setSessionCount(0);
       } else {
         setMode('short');
-        setMinutes(settings?.short_break || 5);
+        setMinutes(settings.short_break);
       }
     } else {
       setMode('work');
-      setMinutes(settings?.work_duration || 25);
+      setMinutes(settings.work_duration);
     }
     setSeconds(0);
     toast.success('Sessão concluída!');
   };
 
   const toggleTimer = () => {
-    if (!isActive && mode === 'work') {
-      setSessionStart(new Date());
-    }
     setIsActive(!isActive);
   };
 
   const resetTimer = () => {
     setIsActive(false);
-    setSessionStart(null);
-    if (mode === 'work') setMinutes(settings?.work_duration || 25);
-    else if (mode === 'short') setMinutes(settings?.short_break || 5);
-    else setMinutes(settings?.long_break || 15);
+    if (mode === 'work') setMinutes(settings.work_duration);
+    else if (mode === 'short') setMinutes(settings.short_break);
+    else setMinutes(settings.long_break);
     setSeconds(0);
+  };
+
+  const updateSettings = (newSettings: Partial<PomodoroSettings>) => {
+    const updated = { ...settings, ...newSettings };
+    setSettings(updated);
+    if (mode === 'work' && !isActive) setMinutes(updated.work_duration);
+    else if (mode === 'short' && !isActive) setMinutes(updated.short_break);
+    else if (mode === 'long' && !isActive) setMinutes(updated.long_break);
+    toast.success('Configurações salvas!');
   };
 
   return (
@@ -158,15 +117,27 @@ export const PomodoroTimer = () => {
             <div className="space-y-4">
               <div>
                 <Label>Trabalho (min)</Label>
-                <Input type="number" defaultValue={settings?.work_duration} onChange={(e) => updateSettings.mutate({ ...settings, work_duration: parseInt(e.target.value) })} />
+                <Input 
+                  type="number" 
+                  value={settings.work_duration} 
+                  onChange={(e) => updateSettings({ work_duration: parseInt(e.target.value) || 25 })} 
+                />
               </div>
               <div>
                 <Label>Pausa Curta (min)</Label>
-                <Input type="number" defaultValue={settings?.short_break} onChange={(e) => updateSettings.mutate({ ...settings, short_break: parseInt(e.target.value) })} />
+                <Input 
+                  type="number" 
+                  value={settings.short_break} 
+                  onChange={(e) => updateSettings({ short_break: parseInt(e.target.value) || 5 })} 
+                />
               </div>
               <div>
                 <Label>Pausa Longa (min)</Label>
-                <Input type="number" defaultValue={settings?.long_break} onChange={(e) => updateSettings.mutate({ ...settings, long_break: parseInt(e.target.value) })} />
+                <Input 
+                  type="number" 
+                  value={settings.long_break} 
+                  onChange={(e) => updateSettings({ long_break: parseInt(e.target.value) || 15 })} 
+                />
               </div>
             </div>
           </DialogContent>
@@ -177,7 +148,9 @@ export const PomodoroTimer = () => {
         <div className="text-6xl font-bold mb-2">
           {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
         </div>
-        <div className="text-sm text-muted-foreground capitalize">{mode === 'work' ? 'Trabalho' : mode === 'short' ? 'Pausa Curta' : 'Pausa Longa'}</div>
+        <div className="text-sm text-muted-foreground capitalize">
+          {mode === 'work' ? 'Trabalho' : mode === 'short' ? 'Pausa Curta' : 'Pausa Longa'}
+        </div>
       </div>
 
       {mode === 'work' && (
@@ -193,8 +166,12 @@ export const PomodoroTimer = () => {
       )}
 
       <div className="flex gap-2 justify-center">
-        <Button onClick={toggleTimer} size="lg">{isActive ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}</Button>
-        <Button onClick={resetTimer} variant="outline" size="lg"><RotateCcw className="w-5 h-5" /></Button>
+        <Button onClick={toggleTimer} size="lg">
+          {isActive ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+        </Button>
+        <Button onClick={resetTimer} variant="outline" size="lg">
+          <RotateCcw className="w-5 h-5" />
+        </Button>
       </div>
     </Card>
   );
