@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Layout } from '@/components/layout/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,7 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
+import { useStudy } from '@/contexts/StudyContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -20,7 +22,9 @@ import {
   Trash2, 
   SortAsc, 
   SortDesc,
-  BookOpen
+  BookOpen,
+  FolderOpen,
+  X
 } from 'lucide-react';
 
 interface GlossaryTerm {
@@ -34,13 +38,16 @@ interface GlossaryTerm {
 
 export default function GlossaryPage() {
   const { user } = useAuth();
+  const { folders } = useStudy();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [filterFolderId, setFilterFolderId] = useState<string | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingTerm, setEditingTerm] = useState<GlossaryTerm | null>(null);
   const [newTerm, setNewTerm] = useState('');
   const [newDefinition, setNewDefinition] = useState('');
+  const [newFolderId, setNewFolderId] = useState<string | null>(null);
 
   const { data: terms = [], isLoading } = useQuery({
     queryKey: ['glossary', user?.id],
@@ -57,11 +64,12 @@ export default function GlossaryPage() {
   });
 
   const addMutation = useMutation({
-    mutationFn: async ({ term, definition }: { term: string; definition: string }) => {
+    mutationFn: async ({ term, definition, folder_id }: { term: string; definition: string; folder_id: string | null }) => {
       const { error } = await supabase.from('glossary').insert({
         user_id: user?.id,
         term: term.trim(),
         definition: definition.trim(),
+        folder_id,
       });
       if (error) throw error;
     },
@@ -69,6 +77,7 @@ export default function GlossaryPage() {
       queryClient.invalidateQueries({ queryKey: ['glossary'] });
       setNewTerm('');
       setNewDefinition('');
+      setNewFolderId(null);
       setIsAddOpen(false);
       toast.success('Termo adicionado ao glossário!');
     },
@@ -78,10 +87,10 @@ export default function GlossaryPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, term, definition }: { id: string; term: string; definition: string }) => {
+    mutationFn: async ({ id, term, definition, folder_id }: { id: string; term: string; definition: string; folder_id: string | null }) => {
       const { error } = await supabase
         .from('glossary')
-        .update({ term: term.trim(), definition: definition.trim() })
+        .update({ term: term.trim(), definition: definition.trim(), folder_id })
         .eq('id', id);
       if (error) throw error;
     },
@@ -109,17 +118,35 @@ export default function GlossaryPage() {
     },
   });
 
+  // Build folder hierarchy for display
+  const getFolderPath = (folderId: string | null): string => {
+    if (!folderId) return '';
+    const folder = folders.find(f => f.id === folderId);
+    if (!folder) return '';
+    
+    if (folder.parentId) {
+      const parentPath = getFolderPath(folder.parentId);
+      return parentPath ? `${parentPath} / ${folder.name}` : folder.name;
+    }
+    return folder.name;
+  };
+
   const filteredTerms = useMemo(() => {
     let filtered = terms.filter(
       (t) =>
         t.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
         t.definition.toLowerCase().includes(searchQuery.toLowerCase())
     );
+    
+    if (filterFolderId) {
+      filtered = filtered.filter(t => t.folder_id === filterFolderId);
+    }
+    
     return filtered.sort((a, b) => {
       const comparison = a.term.localeCompare(b.term, 'pt-BR');
       return sortOrder === 'asc' ? comparison : -comparison;
     });
-  }, [terms, searchQuery, sortOrder]);
+  }, [terms, searchQuery, sortOrder, filterFolderId]);
 
   const groupedTerms = useMemo(() => {
     const groups: Record<string, GlossaryTerm[]> = {};
@@ -138,7 +165,7 @@ export default function GlossaryPage() {
       toast.error('Preencha todos os campos');
       return;
     }
-    addMutation.mutate({ term: newTerm, definition: newDefinition });
+    addMutation.mutate({ term: newTerm, definition: newDefinition, folder_id: newFolderId });
   };
 
   const handleUpdateTerm = () => {
@@ -150,8 +177,12 @@ export default function GlossaryPage() {
       id: editingTerm.id,
       term: editingTerm.term,
       definition: editingTerm.definition,
+      folder_id: editingTerm.folder_id,
     });
   };
+
+  // Get all folders including subfolders for selection
+  const allFolders = folders;
 
   return (
     <Layout>
@@ -198,6 +229,22 @@ export default function GlossaryPage() {
                     rows={4}
                   />
                 </div>
+                <div>
+                  <Label htmlFor="folder">Pasta (opcional)</Label>
+                  <Select value={newFolderId || ''} onValueChange={(v) => setNewFolderId(v || null)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma pasta" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Sem pasta</SelectItem>
+                      {allFolders.map(folder => (
+                        <SelectItem key={folder.id} value={folder.id}>
+                          {getFolderPath(folder.id)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Button onClick={handleAddTerm} className="w-full" disabled={addMutation.isPending}>
                   {addMutation.isPending ? 'Adicionando...' : 'Adicionar'}
                 </Button>
@@ -207,8 +254,8 @@ export default function GlossaryPage() {
         </div>
 
         {/* Search and Filter */}
-        <div className="flex gap-4 mb-6">
-          <div className="relative flex-1">
+        <div className="flex flex-wrap gap-4 mb-6">
+          <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Buscar termos..."
@@ -217,6 +264,20 @@ export default function GlossaryPage() {
               className="pl-10"
             />
           </div>
+          <Select value={filterFolderId || ''} onValueChange={(v) => setFilterFolderId(v || null)}>
+            <SelectTrigger className="w-[200px]">
+              <FolderOpen className="w-4 h-4 mr-2" />
+              <SelectValue placeholder="Todas as pastas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todas as pastas</SelectItem>
+              {allFolders.map(folder => (
+                <SelectItem key={folder.id} value={folder.id}>
+                  {getFolderPath(folder.id)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button
             variant="outline"
             size="icon"
@@ -226,10 +287,24 @@ export default function GlossaryPage() {
           </Button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <Card>
-            <CardContent className="pt-6">
+        {/* Active filters */}
+        {filterFolderId && (
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-sm text-muted-foreground">Filtro ativo:</span>
+            <Badge variant="secondary" className="flex items-center gap-1">
+              <FolderOpen className="w-3 h-3" />
+              {getFolderPath(filterFolderId)}
+              <button onClick={() => setFilterFolderId(null)} className="ml-1 hover:text-destructive">
+                <X className="w-3 h-3" />
+              </button>
+            </Badge>
+          </div>
+        )}
+
+        {/* Stats - Only total */}
+        <div className="mb-6">
+          <Card className="w-fit">
+            <CardContent className="pt-6 pb-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg">
                   <BookOpen className="w-5 h-5 text-primary" />
@@ -237,32 +312,6 @@ export default function GlossaryPage() {
                 <div>
                   <p className="text-2xl font-bold">{terms.length}</p>
                   <p className="text-sm text-muted-foreground">Total de termos</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-chart-2/10 rounded-lg">
-                  <Search className="w-5 h-5 text-chart-2" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{filteredTerms.length}</p>
-                  <p className="text-sm text-muted-foreground">Resultados</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-chart-3/10 rounded-lg">
-                  <BookA className="w-5 h-5 text-chart-3" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{Object.keys(groupedTerms).length}</p>
-                  <p className="text-sm text-muted-foreground">Letras</p>
                 </div>
               </div>
             </CardContent>
@@ -299,7 +348,15 @@ export default function GlossaryPage() {
                           <CardContent className="pt-4 pb-4">
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-lg">{term.term}</h3>
+                                <div className="flex items-center gap-2 flex-wrap mb-1">
+                                  <h3 className="font-semibold text-lg">{term.term}</h3>
+                                  {term.folder_id && (
+                                    <Badge variant="outline" className="text-xs flex items-center gap-1">
+                                      <FolderOpen className="w-3 h-3" />
+                                      {getFolderPath(term.folder_id)}
+                                    </Badge>
+                                  )}
+                                </div>
                                 <p className="text-muted-foreground mt-1">{term.definition}</p>
                               </div>
                               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -353,6 +410,25 @@ export default function GlossaryPage() {
                     onChange={(e) => setEditingTerm({ ...editingTerm, definition: e.target.value })}
                     rows={4}
                   />
+                </div>
+                <div>
+                  <Label htmlFor="edit-folder">Pasta (opcional)</Label>
+                  <Select 
+                    value={editingTerm.folder_id || ''} 
+                    onValueChange={(v) => setEditingTerm({ ...editingTerm, folder_id: v || null })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma pasta" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Sem pasta</SelectItem>
+                      {allFolders.map(folder => (
+                        <SelectItem key={folder.id} value={folder.id}>
+                          {getFolderPath(folder.id)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <Button onClick={handleUpdateTerm} className="w-full" disabled={updateMutation.isPending}>
                   {updateMutation.isPending ? 'Salvando...' : 'Salvar'}
