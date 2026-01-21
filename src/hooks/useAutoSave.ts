@@ -13,15 +13,44 @@ export const useAutoSave = (data: any, options: UseAutoSaveOptions) => {
   const previousDataRef = useRef<string>();
   const timeoutRef = useRef<NodeJS.Timeout>();
   const onSaveRef = useRef(onSave);
+  const isMountedRef = useRef(true);
+  const pendingSaveRef = useRef<string | null>(null);
 
   // Update ref when onSave changes
   useEffect(() => {
     onSaveRef.current = onSave;
   }, [onSave]);
 
+  // Track mounted state
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const executeSave = useCallback(async (dataToSave: string) => {
+    if (!isMountedRef.current) return;
+    
+    setIsSaving(true);
+    try {
+      await onSaveRef.current();
+      if (isMountedRef.current) {
+        previousDataRef.current = dataToSave;
+        setLastSaved(new Date());
+        pendingSaveRef.current = null;
+      }
+    } catch (error) {
+      console.error('[AutoSave] Save failed:', error);
+    } finally {
+      if (isMountedRef.current) {
+        setIsSaving(false);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     if (!enabled) {
-      console.log('[AutoSave] Disabled');
       return;
     }
 
@@ -29,18 +58,17 @@ export const useAutoSave = (data: any, options: UseAutoSaveOptions) => {
     
     // Skip if data hasn't changed
     if (previousDataRef.current === currentData) {
-      console.log('[AutoSave] Data unchanged, skipping');
       return;
     }
     
-    // Skip first render (no previous data)
+    // Initialize on first render
     if (previousDataRef.current === undefined) {
-      console.log('[AutoSave] First render, initializing');
       previousDataRef.current = currentData;
       return;
     }
     
-    console.log('[AutoSave] Data changed, scheduling save in', delay, 'ms');
+    // Store pending save data
+    pendingSaveRef.current = currentData;
     
     // Clear existing timeout
     if (timeoutRef.current) {
@@ -48,18 +76,9 @@ export const useAutoSave = (data: any, options: UseAutoSaveOptions) => {
     }
 
     // Set new timeout
-    timeoutRef.current = setTimeout(async () => {
-      console.log('[AutoSave] Saving...');
-      setIsSaving(true);
-      try {
-        await onSaveRef.current();
-        previousDataRef.current = currentData;
-        setLastSaved(new Date());
-        console.log('[AutoSave] Saved successfully');
-      } catch (error) {
-        console.error('[AutoSave] Save failed:', error);
-      } finally {
-        setIsSaving(false);
+    timeoutRef.current = setTimeout(() => {
+      if (pendingSaveRef.current) {
+        executeSave(pendingSaveRef.current);
       }
     }, delay);
 
@@ -68,7 +87,20 @@ export const useAutoSave = (data: any, options: UseAutoSaveOptions) => {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [data, delay, enabled]);
+  }, [data, delay, enabled, executeSave]);
+
+  // Force save on unmount if there's pending data
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      // Execute pending save synchronously on unmount
+      if (pendingSaveRef.current && pendingSaveRef.current !== previousDataRef.current) {
+        onSaveRef.current();
+      }
+    };
+  }, []);
 
   return { isSaving, lastSaved };
 };
