@@ -16,9 +16,12 @@ import {
   Calendar,
   BookOpen,
   LogOut,
-  BookA
+  BookA,
+  Pencil,
+  Check
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useStudy } from '@/contexts/StudyContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -29,12 +32,14 @@ export const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
-  const { folders, setSelectedFolderId, selectedFolderId } = useStudy();
+  const { folders, setSelectedFolderId, selectedFolderId, updateFolder } = useStudy();
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['1']));
   const [showCreateFolder, setShowCreateFolder] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [profile, setProfile] = useState({ nickname: 'StudyHub', course: '', profession: '', avatarSeed: '' });
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
+  const [editingFolderName, setEditingFolderName] = useState('');
   const sidebarRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -77,6 +82,25 @@ export const Sidebar = () => {
     });
   };
 
+  const startEditingFolder = (e: React.MouseEvent, folderId: string, currentName: string) => {
+    e.stopPropagation();
+    setEditingFolderId(folderId);
+    setEditingFolderName(currentName);
+  };
+
+  const saveEditingFolder = async () => {
+    if (editingFolderId && editingFolderName.trim()) {
+      await updateFolder(editingFolderId, editingFolderName.trim());
+    }
+    setEditingFolderId(null);
+    setEditingFolderName('');
+  };
+
+  const cancelEditingFolder = () => {
+    setEditingFolderId(null);
+    setEditingFolderName('');
+  };
+
   const rootFolders = folders.filter((f) => !f.parentId);
   const getSubfolders = (parentId: string) => folders.filter((f) => f.parentId === parentId);
 
@@ -94,6 +118,74 @@ export const Sidebar = () => {
     ? `https://api.dicebear.com/7.x/identicon/svg?seed=${profile.avatarSeed}`
     : null;
   const subtitle = profile.course || profile.profession;
+
+  const renderFolderItem = (folder: { id: string; name: string }, isSubfolder: boolean = false) => {
+    const isEditing = editingFolderId === folder.id;
+
+    if (isEditing) {
+      return (
+        <div className="flex items-center gap-1 px-2 py-1">
+          <Input
+            value={editingFolderName}
+            onChange={(e) => setEditingFolderName(e.target.value)}
+            className="h-7 text-sm"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') saveEditingFolder();
+              if (e.key === 'Escape') cancelEditingFolder();
+            }}
+            onBlur={saveEditingFolder}
+          />
+          <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={saveEditingFolder}>
+            <Check className="w-3 h-3" />
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div
+        className={cn(
+          'flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer text-sm transition-colors group',
+          selectedFolderId === folder.id
+            ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+            : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
+        )}
+      >
+        {!isSubfolder && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFolder(folder.id);
+            }}
+            className="p-0.5 hover:bg-sidebar-border rounded"
+          >
+            {expandedFolders.has(folder.id) ? (
+              <ChevronDown className="w-3 h-3" />
+            ) : (
+              <ChevronRight className="w-3 h-3" />
+            )}
+          </button>
+        )}
+        <FolderOpen className={cn("w-4 h-4", isSubfolder ? "text-primary/70" : "text-primary")} />
+        <span
+          onClick={() => {
+            setSelectedFolderId(folder.id);
+            navigate(`/folder/${folder.id}`);
+          }}
+          className="flex-1 truncate"
+        >
+          {folder.name}
+        </span>
+        <button
+          onClick={(e) => startEditingFolder(e, folder.id, folder.name)}
+          className="p-1 opacity-0 group-hover:opacity-100 hover:bg-sidebar-border rounded transition-opacity"
+        >
+          <Pencil className="w-3 h-3" />
+        </button>
+      </div>
+    );
+  };
 
   return (
     <aside ref={sidebarRef} className={cn(
@@ -184,53 +276,12 @@ export const Sidebar = () => {
             <div className="space-y-1">
               {rootFolders.map((folder) => (
                 <div key={folder.id}>
-                  <div
-                    className={cn(
-                      'flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer text-sm transition-colors',
-                      selectedFolderId === folder.id
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                        : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
-                    )}
-                  >
-                    <button
-                      onClick={() => toggleFolder(folder.id)}
-                      className="p-0.5 hover:bg-sidebar-border rounded"
-                    >
-                      {expandedFolders.has(folder.id) ? (
-                        <ChevronDown className="w-3 h-3" />
-                      ) : (
-                        <ChevronRight className="w-3 h-3" />
-                      )}
-                    </button>
-                    <FolderOpen className="w-4 h-4 text-primary" />
-                    <span
-                      onClick={() => {
-                        setSelectedFolderId(folder.id);
-                        navigate(`/folder/${folder.id}`);
-                      }}
-                      className="flex-1"
-                    >
-                      {folder.name}
-                    </span>
-                  </div>
+                  {renderFolderItem(folder)}
                   {expandedFolders.has(folder.id) && (
                     <div className="ml-4 mt-1 space-y-1">
                       {getSubfolders(folder.id).map((subfolder) => (
-                        <div
-                          key={subfolder.id}
-                          onClick={() => {
-                            setSelectedFolderId(subfolder.id);
-                            navigate(`/folder/${subfolder.id}`);
-                          }}
-                          className={cn(
-                            'flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer text-sm transition-colors',
-                            selectedFolderId === subfolder.id
-                              ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                              : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
-                          )}
-                        >
-                          <FolderOpen className="w-4 h-4 text-primary/70" />
-                          {subfolder.name}
+                        <div key={subfolder.id}>
+                          {renderFolderItem(subfolder, true)}
                         </div>
                       ))}
                     </div>

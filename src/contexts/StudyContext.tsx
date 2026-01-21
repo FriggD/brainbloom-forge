@@ -13,6 +13,7 @@ interface StudyContextType {
   selectedFolderId: string | null;
   loading: boolean;
   addFolder: (folder: Omit<Folder, 'id' | 'createdAt'>) => Promise<void>;
+  updateFolder: (id: string, name: string) => Promise<void>;
   addCornellNote: (note: Omit<CornellNote, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateCornellNote: (note: CornellNote) => Promise<void>;
   addMindMap: (mindMap: Omit<MindMap, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
@@ -132,6 +133,18 @@ export const StudyProvider = ({ children }: { children: ReactNode }) => {
     } else {
       await fetchData();
       toast.success('Pasta criada!');
+    }
+  };
+
+  const updateFolder = async (id: string, name: string) => {
+    const { error } = await supabase.from('folders').update({ name }).eq('id', id);
+
+    if (error) {
+      toast.error('Erro ao renomear pasta');
+      console.error(error);
+    } else {
+      await fetchData();
+      toast.success('Pasta renomeada!');
     }
   };
 
@@ -285,6 +298,7 @@ export const StudyProvider = ({ children }: { children: ReactNode }) => {
         selectedFolderId,
         loading,
         addFolder,
+        updateFolder,
         addCornellNote,
         updateCornellNote,
         addMindMap,
