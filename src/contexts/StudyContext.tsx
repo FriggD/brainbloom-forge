@@ -13,7 +13,7 @@ interface StudyContextType {
   selectedFolderId: string | null;
   loading: boolean;
   addFolder: (folder: Omit<Folder, 'id' | 'createdAt'>) => Promise<void>;
-  updateFolder: (id: string, name: string) => Promise<void>;
+  updateFolder: (id: string, data: { name?: string; color?: string }) => Promise<void>;
   addCornellNote: (note: Omit<CornellNote, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateCornellNote: (note: CornellNote) => Promise<void>;
   addMindMap: (mindMap: Omit<MindMap, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
@@ -136,15 +136,19 @@ export const StudyProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const updateFolder = async (id: string, name: string) => {
-    const { error } = await supabase.from('folders').update({ name }).eq('id', id);
+  const updateFolder = async (id: string, data: { name?: string; color?: string }) => {
+    const updateData: { name?: string; color?: string | null } = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.color !== undefined) updateData.color = data.color || null;
+
+    const { error } = await supabase.from('folders').update(updateData).eq('id', id);
 
     if (error) {
-      toast.error('Erro ao renomear pasta');
+      toast.error('Erro ao atualizar pasta');
       console.error(error);
     } else {
       await fetchData();
-      toast.success('Pasta renomeada!');
+      toast.success('Pasta atualizada!');
     }
   };
 

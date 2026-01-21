@@ -18,10 +18,12 @@ import {
   LogOut,
   BookA,
   Pencil,
-  Check
+  Check,
+  Palette
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useStudy } from '@/contexts/StudyContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -90,10 +92,14 @@ export const Sidebar = () => {
 
   const saveEditingFolder = async () => {
     if (editingFolderId && editingFolderName.trim()) {
-      await updateFolder(editingFolderId, editingFolderName.trim());
+      await updateFolder(editingFolderId, { name: editingFolderName.trim() });
     }
     setEditingFolderId(null);
     setEditingFolderName('');
+  };
+
+  const updateFolderColor = async (folderId: string, color: string) => {
+    await updateFolder(folderId, { color });
   };
 
   const cancelEditingFolder = () => {
@@ -119,8 +125,23 @@ export const Sidebar = () => {
     : null;
   const subtitle = profile.course || profile.profession;
 
-  const renderFolderItem = (folder: { id: string; name: string }, isSubfolder: boolean = false) => {
+  const folderColors = [
+    { name: 'Padrão', value: '' },
+    { name: 'Vermelho', value: 'hsl(0, 72%, 51%)' },
+    { name: 'Laranja', value: 'hsl(25, 95%, 53%)' },
+    { name: 'Âmbar', value: 'hsl(45, 93%, 47%)' },
+    { name: 'Verde', value: 'hsl(142, 71%, 45%)' },
+    { name: 'Esmeralda', value: 'hsl(160, 84%, 39%)' },
+    { name: 'Ciano', value: 'hsl(187, 85%, 43%)' },
+    { name: 'Azul', value: 'hsl(217, 91%, 60%)' },
+    { name: 'Índigo', value: 'hsl(239, 84%, 67%)' },
+    { name: 'Violeta', value: 'hsl(258, 90%, 66%)' },
+    { name: 'Rosa', value: 'hsl(330, 81%, 60%)' },
+  ];
+
+  const renderFolderItem = (folder: { id: string; name: string; color?: string }, isSubfolder: boolean = false) => {
     const isEditing = editingFolderId === folder.id;
+    const folderColor = folder.color || undefined;
 
     if (isEditing) {
       return (
@@ -167,7 +188,10 @@ export const Sidebar = () => {
             )}
           </button>
         )}
-        <FolderOpen className={cn("w-4 h-4", isSubfolder ? "text-primary/70" : "text-primary")} />
+        <FolderOpen 
+          className="w-4 h-4" 
+          style={{ color: folderColor || (isSubfolder ? 'hsl(var(--primary) / 0.7)' : 'hsl(var(--primary))') }}
+        />
         <span
           onClick={() => {
             setSelectedFolderId(folder.id);
@@ -177,12 +201,45 @@ export const Sidebar = () => {
         >
           {folder.name}
         </span>
-        <button
-          onClick={(e) => startEditingFolder(e, folder.id, folder.name)}
-          className="p-1 opacity-0 group-hover:opacity-100 hover:bg-sidebar-border rounded transition-opacity"
-        >
-          <Pencil className="w-3 h-3" />
-        </button>
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                onClick={(e) => e.stopPropagation()}
+                className="p-1 hover:bg-sidebar-border rounded"
+              >
+                <Palette className="w-3 h-3" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-2" align="start">
+              <div className="flex flex-wrap gap-1.5 max-w-[160px]">
+                {folderColors.map((c) => (
+                  <button
+                    key={c.value || 'default'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      updateFolderColor(folder.id, c.value);
+                    }}
+                    className={cn(
+                      'w-6 h-6 rounded-full border-2 transition-all hover:scale-110',
+                      folder.color === c.value ? 'border-foreground' : 'border-transparent'
+                    )}
+                    style={{ 
+                      backgroundColor: c.value || 'hsl(var(--primary))',
+                    }}
+                    title={c.name}
+                  />
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+          <button
+            onClick={(e) => startEditingFolder(e, folder.id, folder.name)}
+            className="p-1 hover:bg-sidebar-border rounded"
+          >
+            <Pencil className="w-3 h-3" />
+          </button>
+        </div>
       </div>
     );
   };
