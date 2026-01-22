@@ -18,11 +18,26 @@ import {
 } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useStudy } from '@/contexts/StudyContext';
+import { cn } from '@/lib/utils';
 
 interface CreateFolderDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+const folderColors = [
+  { name: 'Padrão', value: '' },
+  { name: 'Vermelho', value: 'hsl(0, 72%, 51%)' },
+  { name: 'Laranja', value: 'hsl(25, 95%, 53%)' },
+  { name: 'Âmbar', value: 'hsl(45, 93%, 47%)' },
+  { name: 'Verde', value: 'hsl(142, 71%, 45%)' },
+  { name: 'Esmeralda', value: 'hsl(160, 84%, 39%)' },
+  { name: 'Ciano', value: 'hsl(187, 85%, 43%)' },
+  { name: 'Azul', value: 'hsl(217, 91%, 60%)' },
+  { name: 'Índigo', value: 'hsl(239, 84%, 67%)' },
+  { name: 'Violeta', value: 'hsl(258, 90%, 66%)' },
+  { name: 'Rosa', value: 'hsl(330, 81%, 60%)' },
+];
 
 export const CreateFolderDialog = ({ open, onOpenChange }: CreateFolderDialogProps) => {
   const { folders, addFolder } = useStudy();
@@ -43,7 +58,7 @@ export const CreateFolderDialog = ({ open, onOpenChange }: CreateFolderDialogPro
     await addFolder({
       name: name.trim(),
       parentId: parentId === 'none' ? undefined : parentId,
-      color,
+      color: color || undefined,
     });
 
     setName('');
