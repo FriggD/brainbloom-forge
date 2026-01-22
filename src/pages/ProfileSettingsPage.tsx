@@ -41,7 +41,7 @@ const ProfileSettingsPage = () => {
   const handleSave = () => {
     localStorage.setItem('userProfile', JSON.stringify(profile));
     toast.success('Perfil atualizado com sucesso!');
-    navigate('/');
+    window.dispatchEvent(new Event('profileUpdated'));
   };
 
   const regenerateAvatar = () => {
@@ -156,6 +156,10 @@ const ProfileSettingsPage = () => {
             <Button onClick={handleSave} className="w-full">
               <Save className="w-4 h-4 mr-2" />
               Salvar Perfil
+            </Button>
+            <Button onClick={() => navigate('/settings')} variant="outline" className="w-full">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar
             </Button>
           </CardContent>
         </Card>

@@ -48,6 +48,22 @@ export const Sidebar = () => {
         avatarSeed: data.avatarSeed || ''
       });
     }
+
+    const handleProfileUpdate = () => {
+      const updated = localStorage.getItem('userProfile');
+      if (updated) {
+        const data = JSON.parse(updated);
+        setProfile({
+          nickname: data.nickname || 'StudyHub',
+          course: data.course || '',
+          profession: data.profession || '',
+          avatarSeed: data.avatarSeed || ''
+        });
+      }
+    };
+
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
   }, []);
 
   useEffect(() => {

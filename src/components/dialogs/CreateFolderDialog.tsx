@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useStudy } from '@/contexts/StudyContext';
 
 interface CreateFolderDialogProps {
@@ -27,6 +28,12 @@ export const CreateFolderDialog = ({ open, onOpenChange }: CreateFolderDialogPro
   const { folders, addFolder } = useStudy();
   const [name, setName] = useState('');
   const [parentId, setParentId] = useState<string>('none');
+  const [color, setColor] = useState('#6366f1');
+
+  const colors = [
+    '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316',
+    '#eab308', '#84cc16', '#10b981', '#14b8a6', '#06b6d4',
+  ];
 
   const rootFolders = folders.filter((f) => !f.parentId);
 
@@ -36,10 +43,12 @@ export const CreateFolderDialog = ({ open, onOpenChange }: CreateFolderDialogPro
     await addFolder({
       name: name.trim(),
       parentId: parentId === 'none' ? undefined : parentId,
+      color,
     });
 
     setName('');
     setParentId('none');
+    setColor('#6366f1');
     onOpenChange(false);
   };
 
@@ -74,6 +83,32 @@ export const CreateFolderDialog = ({ open, onOpenChange }: CreateFolderDialogPro
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Cor da pasta</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-start">
+                  <div className="w-4 h-4 rounded mr-2" style={{ backgroundColor: color }} />
+                  Selecionar cor
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-3" align="start">
+                <div className="grid grid-cols-5 gap-2">
+                  {colors.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setColor(c)}
+                      className="w-8 h-8 rounded border-2 transition-all hover:scale-110"
+                      style={{ 
+                        backgroundColor: c,
+                        borderColor: color === c ? '#000' : 'transparent'
+                      }}
+                    />
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
         <DialogFooter>
