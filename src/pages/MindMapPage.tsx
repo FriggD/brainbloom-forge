@@ -35,11 +35,13 @@ const MindMapPage = () => {
     setEditingMindMap(undefined);
   };
 
-  const handleAutoSave = (mindMap: MindMap) => {
-    if (editingMindMap) {
-      updateMindMap(mindMap);
+  const handleAutoSave = async (mindMap: MindMap) => {
+    // Check if mind map already exists in the database
+    const existingMap = mindMaps.find(m => m.id === mindMap.id);
+    if (existingMap || editingMindMap) {
+      await updateMindMap(mindMap, true); // silent = true
     } else {
-      addMindMap(mindMap);
+      await addMindMap(mindMap);
       setEditingMindMap(mindMap);
     }
   };
