@@ -75,7 +75,11 @@ export const Sidebar = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (!isCollapsed && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      // Don't collapse if clicking inside a popover or radix portal
+      const isInsidePopover = (target as Element)?.closest?.('[data-radix-popper-content-wrapper]') ||
+                              (target as Element)?.closest?.('[role="dialog"]');
+      if (!isCollapsed && sidebarRef.current && !sidebarRef.current.contains(target) && !isInsidePopover) {
         setIsCollapsed(true);
       }
     };
