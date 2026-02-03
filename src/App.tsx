@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,8 +22,6 @@ import FolderViewPage from "./pages/FolderViewPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
-
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
@@ -41,8 +40,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+const App = () => {
+  const [queryClient] = useState(() => new QueryClient());
+  
+  return (
+    <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light" themes={['light', 'dark', 'orquidea', 'sapphira', 'bubblegum']}>
       <TooltipProvider>
         <BrowserRouter>
@@ -71,7 +73,8 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
-  </QueryClientProvider>
-);
+    </QueryClientProvider>
+  );
+};
 
 export default App;
