@@ -15,9 +15,9 @@ interface StudyContextType {
   addFolder: (folder: Omit<Folder, 'id' | 'createdAt'>) => Promise<void>;
   updateFolder: (id: string, data: { name?: string; color?: string }) => Promise<void>;
   addCornellNote: (note: Omit<CornellNote, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
-  updateCornellNote: (note: CornellNote) => Promise<void>;
+  updateCornellNote: (note: CornellNote, silent?: boolean) => Promise<void>;
   addMindMap: (mindMap: Omit<MindMap, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
-  updateMindMap: (mindMap: MindMap) => Promise<void>;
+  updateMindMap: (mindMap: MindMap, silent?: boolean) => Promise<void>;
   addTag: (tag: Omit<Tag, 'id'>) => Promise<void>;
   setSelectedFolderId: (id: string | null) => void;
   deleteFolder: (id: string) => Promise<void>;
@@ -177,7 +177,7 @@ export const StudyProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const updateCornellNote = async (note: CornellNote) => {
+  const updateCornellNote = async (note: CornellNote, silent = false) => {
     const { error } = await supabase.from('cornell_notes').update({
       title: note.title,
       subject: note.subject || null,
@@ -191,11 +191,13 @@ export const StudyProvider = ({ children }: { children: ReactNode }) => {
     }).eq('id', note.id);
 
     if (error) {
-      toast.error('Erro ao atualizar anotação');
+      if (!silent) toast.error('Erro ao atualizar anotação');
       console.error(error);
     } else {
-      await fetchData();
-      toast.success('Anotação atualizada!');
+      if (!silent) {
+        await fetchData();
+        toast.success('Anotação atualizada!');
+      }
     }
   };
 
@@ -220,7 +222,7 @@ export const StudyProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const updateMindMap = async (mindMap: MindMap) => {
+  const updateMindMap = async (mindMap: MindMap, silent = false) => {
     const { error } = await supabase.from('mind_maps').update({
       title: mindMap.title,
       central_concept: mindMap.centralConcept,
@@ -230,11 +232,13 @@ export const StudyProvider = ({ children }: { children: ReactNode }) => {
     }).eq('id', mindMap.id);
 
     if (error) {
-      toast.error('Erro ao atualizar mapa mental');
+      if (!silent) toast.error('Erro ao atualizar mapa mental');
       console.error(error);
     } else {
-      await fetchData();
-      toast.success('Mapa mental atualizado!');
+      if (!silent) {
+        await fetchData();
+        toast.success('Mapa mental atualizado!');
+      }
     }
   };
 

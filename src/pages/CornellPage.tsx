@@ -35,11 +35,13 @@ const CornellPage = () => {
     setEditingNote(undefined);
   };
 
-  const handleAutoSave = (note: CornellNote) => {
-    if (editingNote) {
-      updateCornellNote(note);
+  const handleAutoSave = async (note: CornellNote) => {
+    // Check if note already exists in the database
+    const existingNote = cornellNotes.find(n => n.id === note.id);
+    if (existingNote || editingNote) {
+      await updateCornellNote(note, true); // silent = true
     } else {
-      addCornellNote(note);
+      await addCornellNote(note);
       setEditingNote(note);
     }
   };

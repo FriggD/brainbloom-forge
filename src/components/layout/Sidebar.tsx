@@ -214,20 +214,21 @@ export const Sidebar = () => {
             navigate(`/folder/${folder.id}`);
           }}
           className="flex-1 truncate"
+          style={{ color: folderColor }}
         >
           {folder.name}
         </span>
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Popover>
+          <Popover modal={false}>
             <PopoverTrigger asChild>
               <button
                 onClick={(e) => e.stopPropagation()}
                 className="p-1 hover:bg-sidebar-border rounded"
               >
-                <Palette className="w-3 h-3" />
+                <Palette className="w-3 h-3" style={{ color: folderColor }} />
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-2" align="start">
+            <PopoverContent className="w-auto p-2" align="start" side="right" sideOffset={8}>
               <div className="flex flex-wrap gap-1.5 max-w-[160px]">
                 {folderColors.map((c) => (
                   <button
@@ -253,7 +254,7 @@ export const Sidebar = () => {
             onClick={(e) => startEditingFolder(e, folder.id, folder.name)}
             className="p-1 hover:bg-sidebar-border rounded"
           >
-            <Pencil className="w-3 h-3" />
+            <Pencil className="w-3 h-3" style={{ color: folderColor }} />
           </button>
         </div>
       </div>
@@ -381,7 +382,7 @@ export const Sidebar = () => {
                     : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
                 )}
               >
-                <FolderOpen className="w-4 h-4 text-primary" />
+                <FolderOpen className="w-4 h-4" style={{ color: folder.color || 'hsl(var(--primary))' }} />
               </button>
             ))}
           </div>

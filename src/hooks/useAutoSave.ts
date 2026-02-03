@@ -34,11 +34,13 @@ export const useAutoSave = (data: any, options: UseAutoSaveOptions) => {
     
     setIsSaving(true);
     try {
+      console.log('[AutoSave] Executing save...');
       await onSaveRef.current();
       if (isMountedRef.current) {
         previousDataRef.current = dataToSave;
         setLastSaved(new Date());
         pendingSaveRef.current = null;
+        console.log('[AutoSave] Save completed successfully');
       }
     } catch (error) {
       console.error('[AutoSave] Save failed:', error);
