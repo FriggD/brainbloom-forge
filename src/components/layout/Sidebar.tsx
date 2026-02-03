@@ -42,6 +42,7 @@ export const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const [editingFolderName, setEditingFolderName] = useState('');
+  const [colorPopoverOpen, setColorPopoverOpen] = useState<string | null>(null);
   const sidebarRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -75,6 +76,9 @@ export const Sidebar = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Don't collapse if a color popover is open
+      if (colorPopoverOpen) return;
+      
       const target = event.target as Node;
       // Don't collapse if clicking inside a popover or radix portal
       const isInsidePopover = (target as Element)?.closest?.('[data-radix-popper-content-wrapper]') ||
@@ -85,7 +89,7 @@ export const Sidebar = () => {
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isCollapsed]);
+  }, [isCollapsed, colorPopoverOpen]);
 
   const handleLogout = async () => {
     await signOut();
@@ -223,7 +227,11 @@ export const Sidebar = () => {
           {folder.name}
         </span>
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Popover modal={false}>
+          <Popover 
+            modal={false} 
+            open={colorPopoverOpen === folder.id}
+            onOpenChange={(open) => setColorPopoverOpen(open ? folder.id : null)}
+          >
             <PopoverTrigger asChild>
               <button
                 onClick={(e) => e.stopPropagation()}
@@ -240,6 +248,7 @@ export const Sidebar = () => {
                     onClick={(e) => {
                       e.stopPropagation();
                       updateFolderColor(folder.id, c.value);
+                      setColorPopoverOpen(null);
                     }}
                     className={cn(
                       'w-6 h-6 rounded-full border-2 transition-all hover:scale-110',
