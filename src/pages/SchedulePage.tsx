@@ -1,0 +1,329 @@
+import { useState } from 'react';
+import { Layout } from '@/components/layout/Layout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Plus, Trash2, Clock, GraduationCap } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+
+const DAYS = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'] as const;
+const DAY_MAP: Record<number, string> = { 0: 'Segunda', 1: 'Terça', 2: 'Quarta', 3: 'Quinta', 4: 'Sexta', 5: 'Sábado' };
+
+const TIME_SLOTS = [
+  '07:00', '07:30', '08:00', '08:30', '09:00', '09:30',
+  '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
+  '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
+  '16:00', '16:30', '17:00', '17:30', '18:00', '18:30',
+  '19:00', '19:30', '20:00', '20:30', '21:00', '21:30',
+  '22:00',
+];
+
+const CLASS_COLORS = [
+  '#6699cc', '#cc2936', '#d14081', '#adf7b6', '#f4a261',
+  '#2a9d8f', '#e76f51', '#264653', '#a855f7', '#ec4899',
+];
+
+interface ScheduleClass {
+  id: string;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  subject: string;
+  room: string | null;
+  teacher: string | null;
+  color: string | null;
+}
+
+const SchedulePage = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [form, setForm] = useState({
+    subject: '',
+    room: '',
+    teacher: '',
+    day_of_week: '0',
+    start_time: '08:00',
+    end_time: '09:30',
+    color: CLASS_COLORS[0],
+  });
+
+  const { data: classes = [] } = useQuery({
+    queryKey: ['schedule-classes', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('schedule_classes')
+        .select('*')
+        .order('start_time');
+      if (error) throw error;
+      return data as ScheduleClass[];
+    },
+    enabled: !!user,
+  });
+
+  const addMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from('schedule_classes').insert({
+        user_id: user!.id,
+        subject: form.subject,
+        room: form.room || null,
+        teacher: form.teacher || null,
+        day_of_week: parseInt(form.day_of_week),
+        start_time: form.start_time,
+        end_time: form.end_time,
+        color: form.color,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schedule-classes'] });
+      toast.success('Aula adicionada!');
+      setDialogOpen(false);
+      setForm({ subject: '', room: '', teacher: '', day_of_week: '0', start_time: '08:00', end_time: '09:30', color: CLASS_COLORS[0] });
+    },
+    onError: () => toast.error('Erro ao adicionar aula'),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('schedule_classes').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schedule-classes'] });
+      toast.success('Aula removida!');
+    },
+    onError: () => toast.error('Erro ao remover aula'),
+  });
+
+  // Build time range for the timetable
+  const usedTimes = classes.map(c => c.start_time.slice(0, 5));
+  const usedEndTimes = classes.map(c => c.end_time.slice(0, 5));
+  const allTimes = [...usedTimes, ...usedEndTimes];
+  
+  const minTime = allTimes.length > 0 ? allTimes.sort()[0] : '08:00';
+  const maxTime = allTimes.length > 0 ? allTimes.sort().reverse()[0] : '18:00';
+  
+  const displaySlots = TIME_SLOTS.filter(t => t >= minTime && t < maxTime);
+  if (displaySlots.length === 0 && classes.length === 0) {
+    // Default display
+    displaySlots.push(...TIME_SLOTS.filter(t => t >= '08:00' && t <= '18:00'));
+  }
+
+  const getClassForSlot = (dayIndex: number, time: string): ScheduleClass | null => {
+    return classes.find(c => 
+      c.day_of_week === dayIndex && 
+      c.start_time.slice(0, 5) <= time && 
+      c.end_time.slice(0, 5) > time
+    ) || null;
+  };
+
+  const isFirstSlotOfClass = (dayIndex: number, time: string): boolean => {
+    const cls = getClassForSlot(dayIndex, time);
+    return cls ? cls.start_time.slice(0, 5) === time : false;
+  };
+
+  const getClassRowSpan = (cls: ScheduleClass): number => {
+    const startIdx = displaySlots.indexOf(cls.start_time.slice(0, 5));
+    const endIdx = displaySlots.indexOf(cls.end_time.slice(0, 5));
+    if (startIdx === -1) return 1;
+    if (endIdx === -1) return displaySlots.length - startIdx;
+    return endIdx - startIdx;
+  };
+
+  return (
+    <Layout>
+      <div className="p-4 md:p-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
+              <GraduationCap className="w-7 h-7" />
+              Cronograma de Aulas
+            </h1>
+            <p className="text-muted-foreground mt-1">Organize seus horários semanais</p>
+          </div>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button><Plus className="w-4 h-4 mr-2" />Nova Aula</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Adicionar Aula</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <div>
+                  <Label>Matéria *</Label>
+                  <Input value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))} placeholder="Ex: Matemática" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Sala / Bloco</Label>
+                    <Input value={form.room} onChange={e => setForm(f => ({ ...f, room: e.target.value }))} placeholder="Ex: Sala 201" />
+                  </div>
+                  <div>
+                    <Label>Professor(a)</Label>
+                    <Input value={form.teacher} onChange={e => setForm(f => ({ ...f, teacher: e.target.value }))} placeholder="Ex: Prof. Silva" />
+                  </div>
+                </div>
+                <div>
+                  <Label>Dia da semana</Label>
+                  <Select value={form.day_of_week} onValueChange={v => setForm(f => ({ ...f, day_of_week: v }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {DAYS.map((day, i) => (
+                        <SelectItem key={i} value={String(i)}>{day}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Início</Label>
+                    <Select value={form.start_time} onValueChange={v => setForm(f => ({ ...f, start_time: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {TIME_SLOTS.map(t => (
+                          <SelectItem key={t} value={t}>{t}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Fim</Label>
+                    <Select value={form.end_time} onValueChange={v => setForm(f => ({ ...f, end_time: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {TIME_SLOTS.filter(t => t > form.start_time).map(t => (
+                          <SelectItem key={t} value={t}>{t}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <Label>Cor</Label>
+                  <div className="flex gap-2 mt-1">
+                    {CLASS_COLORS.map(c => (
+                      <button
+                        key={c}
+                        onClick={() => setForm(f => ({ ...f, color: c }))}
+                        className="w-7 h-7 rounded-full border-2 transition-all hover:scale-110"
+                        style={{ backgroundColor: c, borderColor: form.color === c ? 'hsl(var(--foreground))' : 'transparent' }}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <Button
+                  className="w-full"
+                  disabled={!form.subject || addMutation.isPending}
+                  onClick={() => addMutation.mutate()}
+                >
+                  {addMutation.isPending ? 'Salvando...' : 'Adicionar'}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Timetable grid */}
+        <Card>
+          <CardContent className="p-0 overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-20 text-center sticky left-0 bg-background z-10">
+                    <Clock className="w-4 h-4 mx-auto" />
+                  </TableHead>
+                  {DAYS.map(day => (
+                    <TableHead key={day} className="text-center min-w-[140px] font-semibold">{day}</TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {displaySlots.map(time => (
+                  <TableRow key={time} className="h-12">
+                    <TableCell className="text-center text-xs text-muted-foreground font-mono sticky left-0 bg-background z-10 border-r">
+                      {time}
+                    </TableCell>
+                    {DAYS.map((_, dayIndex) => {
+                      const cls = getClassForSlot(dayIndex, time);
+                      const isFirst = isFirstSlotOfClass(dayIndex, time);
+
+                      if (cls && !isFirst) return null; // spanned by rowSpan
+
+                      if (cls && isFirst) {
+                        const span = getClassRowSpan(cls);
+                        return (
+                          <TableCell
+                            key={dayIndex}
+                            rowSpan={span}
+                            className="p-1 align-top"
+                          >
+                            <div
+                              className="rounded-lg p-2 h-full text-sm group relative"
+                              style={{ backgroundColor: (cls.color || '#6699cc') + '22', borderLeft: `3px solid ${cls.color || '#6699cc'}` }}
+                            >
+                              <p className="font-semibold truncate" style={{ color: cls.color || '#6699cc' }}>
+                                {cls.subject}
+                              </p>
+                              {cls.room && <p className="text-xs text-muted-foreground truncate">{cls.room}</p>}
+                              {cls.teacher && <p className="text-xs text-muted-foreground truncate">{cls.teacher}</p>}
+                              <button
+                                onClick={() => deleteMutation.mutate(cls.id)}
+                                className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-destructive/10"
+                              >
+                                <Trash2 className="w-3 h-3 text-destructive" />
+                              </button>
+                            </div>
+                          </TableCell>
+                        );
+                      }
+
+                      return <TableCell key={dayIndex} className="border-r border-dashed" />;
+                    })}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        {/* List view for mobile */}
+        {classes.length > 0 && (
+          <div className="mt-6 md:hidden space-y-3">
+            <h2 className="text-lg font-semibold">Suas Aulas</h2>
+            {classes.map(cls => (
+              <Card key={cls.id}>
+                <CardContent className="p-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-1 h-10 rounded-full" style={{ backgroundColor: cls.color || '#6699cc' }} />
+                    <div>
+                      <p className="font-medium">{cls.subject}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {DAY_MAP[cls.day_of_week]} • {cls.start_time.slice(0, 5)} - {cls.end_time.slice(0, 5)}
+                        {cls.room && ` • ${cls.room}`}
+                        {cls.teacher && ` • ${cls.teacher}`}
+                      </p>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(cls.id)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </Layout>
+  );
+};
+
+export default SchedulePage;
