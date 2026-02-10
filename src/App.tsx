@@ -19,6 +19,7 @@ import ThemeSettingsPage from "./pages/ThemeSettingsPage";
 import ProfileSettingsPage from "./pages/ProfileSettingsPage";
 import CalendarSettingsPage from "./pages/CalendarSettingsPage";
 import FolderViewPage from "./pages/FolderViewPage";
+import SchedulePage from "./pages/SchedulePage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
@@ -61,6 +62,7 @@ const App = () => {
                 <Route path="/flashcards" element={<ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
                 <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
                 <Route path="/content-hub" element={<ProtectedRoute><ContentHubPage /></ProtectedRoute>} />
+                <Route path="/schedule" element={<ProtectedRoute><SchedulePage /></ProtectedRoute>} />
                 <Route path="/glossary" element={<ProtectedRoute><GlossaryPage /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="/settings/theme" element={<ProtectedRoute><ThemeSettingsPage /></ProtectedRoute>} />

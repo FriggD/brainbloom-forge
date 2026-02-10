@@ -19,7 +19,8 @@ import {
   BookA,
   Pencil,
   Check,
-  Palette
+  Palette,
+  GraduationCap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -141,6 +142,7 @@ export const Sidebar = () => {
     { icon: Layers, label: 'Flashcards', path: '/flashcards' },
     { icon: BookA, label: 'Glossário', path: '/glossary' },
     { icon: Calendar, label: 'Calendário', path: '/calendar' },
+    { icon: GraduationCap, label: 'Cronograma', path: '/schedule' },
     { icon: BookOpen, label: 'Hub de Conteúdo', path: '/content-hub' },
   ];
 
