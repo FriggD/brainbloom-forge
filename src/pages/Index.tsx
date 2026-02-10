@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useStudy } from '@/contexts/StudyContext';
 import { Layout } from '@/components/layout/Layout';
 import { UpcomingEventsCard } from '@/components/calendar/UpcomingEventsCard';
+import { TodayClassesCard } from '@/components/schedule/TodayClassesCard';
 import { PomodoroTimer } from '@/components/pomodoro/PomodoroTimer';
 import { StudyStats } from '@/components/stats/StudyStats';
 import { QuickReview } from '@/components/review/QuickReview';
@@ -86,8 +87,9 @@ const Index = () => {
           <QuickReview />
         </div>
 
-        {/* Upcoming Events */}
-        <div className="mb-12">
+        {/* Today's Classes & Upcoming Events */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+          <TodayClassesCard />
           <UpcomingEventsCard />
         </div>
 
