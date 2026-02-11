@@ -16,14 +16,13 @@ import { toast } from 'sonner';
 const DAYS = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'] as const;
 const DAY_MAP: Record<number, string> = { 0: 'Segunda', 1: 'Terça', 2: 'Quarta', 3: 'Quinta', 4: 'Sexta', 5: 'Sábado' };
 
-const TIME_SLOTS = [
-  '07:00', '07:30', '08:00', '08:30', '09:00', '09:30',
-  '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
-  '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
-  '16:00', '16:30', '17:00', '17:30', '18:00', '18:30',
-  '19:00', '19:30', '20:00', '20:30', '21:00', '21:30',
-  '22:00',
-];
+const TIME_SLOTS: string[] = [];
+for (let h = 7; h <= 22; h++) {
+  for (let m = 0; m < 60; m += 5) {
+    if (h === 22 && m > 0) break;
+    TIME_SLOTS.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+  }
+}
 
 const CLASS_COLORS = [
   '#6699cc', '#cc2936', '#d14081', '#adf7b6', '#f4a261',
@@ -133,17 +132,29 @@ const SchedulePage = () => {
     onError: () => toast.error('Erro ao remover aula'),
   });
 
-  // Build time range for the timetable
+  // Build display slots (30-min intervals for the grid view)
+  const DISPLAY_SLOTS: string[] = [];
+  for (let h = 7; h <= 22; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      if (h === 22 && m > 0) break;
+      DISPLAY_SLOTS.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+    }
+  }
+
   const usedTimes = classes.map(c => c.start_time.slice(0, 5));
   const usedEndTimes = classes.map(c => c.end_time.slice(0, 5));
   const allTimes = [...usedTimes, ...usedEndTimes];
   
   const minTime = allTimes.length > 0 ? allTimes.sort()[0] : '08:00';
   const maxTime = allTimes.length > 0 ? allTimes.sort().reverse()[0] : '18:00';
-  
-  const displaySlots = TIME_SLOTS.filter(t => t >= minTime && t < maxTime);
+
+  // Snap min/max to nearest 30-min boundary for display
+  const snapDown = (t: string) => { const [h, m] = t.split(':').map(Number); return `${String(h).padStart(2, '0')}:${m < 30 ? '00' : '30'}`; };
+  const snapUp = (t: string) => { const [h, m] = t.split(':').map(Number); return m > 30 ? `${String(h + 1).padStart(2, '0')}:00` : m > 0 ? `${String(h).padStart(2, '0')}:30` : t; };
+
+  const displaySlots = DISPLAY_SLOTS.filter(t => t >= snapDown(minTime) && t < snapUp(maxTime));
   if (displaySlots.length === 0 && classes.length === 0) {
-    displaySlots.push(...TIME_SLOTS.filter(t => t >= '08:00' && t <= '18:00'));
+    displaySlots.push(...DISPLAY_SLOTS.filter(t => t >= '08:00' && t <= '18:00'));
   }
 
   const getClassForSlot = (dayIndex: number, time: string): ScheduleClass | null => {
