@@ -14,7 +14,7 @@ interface StudyContextType {
   loading: boolean;
   addFolder: (folder: Omit<Folder, 'id' | 'createdAt'>) => Promise<void>;
   updateFolder: (id: string, data: { name?: string; color?: string }) => Promise<void>;
-  addCornellNote: (note: Omit<CornellNote, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  addCornellNote: (note: CornellNote | Omit<CornellNote, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateCornellNote: (note: CornellNote, silent?: boolean) => Promise<void>;
   addMindMap: (mindMap: Omit<MindMap, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateMindMap: (mindMap: MindMap, silent?: boolean) => Promise<void>;
@@ -152,10 +152,13 @@ export const StudyProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const addCornellNote = async (note: Omit<CornellNote, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addCornellNote = async (note: CornellNote | Omit<CornellNote, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!user) return;
 
+    const noteId = 'id' in note ? note.id : undefined;
+
     const { error } = await supabase.from('cornell_notes').insert({
+      ...(noteId ? { id: noteId } : {}),
       title: note.title,
       subject: note.subject || null,
       date: note.date,
@@ -173,7 +176,6 @@ export const StudyProvider = ({ children }: { children: ReactNode }) => {
       console.error(error);
     } else {
       await fetchData();
-      toast.success('Anotação criada!');
     }
   };
 
