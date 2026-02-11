@@ -167,7 +167,12 @@ const SchedulePage = () => {
 
   const isFirstSlotOfClass = (dayIndex: number, time: string): boolean => {
     const cls = getClassForSlot(dayIndex, time);
-    return cls ? cls.start_time.slice(0, 5) === time : false;
+    if (!cls) return false;
+    // Find the first display slot that falls within this class's range
+    const firstSlot = displaySlots.find(s => 
+      cls.start_time.slice(0, 5) <= s && cls.end_time.slice(0, 5) > s && cls.day_of_week === dayIndex
+    );
+    return firstSlot === time;
   };
 
   const getClassRowSpan = (cls: ScheduleClass): number => {
