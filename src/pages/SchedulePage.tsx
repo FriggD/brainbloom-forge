@@ -176,11 +176,18 @@ const SchedulePage = () => {
   };
 
   const getClassRowSpan = (cls: ScheduleClass): number => {
-    const startIdx = displaySlots.indexOf(cls.start_time.slice(0, 5));
-    const endIdx = displaySlots.indexOf(cls.end_time.slice(0, 5));
-    if (startIdx === -1) return 1;
-    if (endIdx === -1) return displaySlots.length - startIdx;
-    return endIdx - startIdx;
+    const startTime = cls.start_time.slice(0, 5);
+    const endTime = cls.end_time.slice(0, 5);
+    // Find first display slot within class range
+    const firstIdx = displaySlots.findIndex(s => startTime <= s && endTime > s);
+    if (firstIdx === -1) return 1;
+    // Find last display slot within class range
+    let lastIdx = firstIdx;
+    for (let i = firstIdx + 1; i < displaySlots.length; i++) {
+      if (displaySlots[i] < endTime) lastIdx = i;
+      else break;
+    }
+    return lastIdx - firstIdx + 1;
   };
 
   return (
