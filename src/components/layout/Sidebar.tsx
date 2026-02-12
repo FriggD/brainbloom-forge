@@ -141,6 +141,7 @@ export const Sidebar = () => {
     { icon: Network, label: 'Mind Mapping', path: '/mindmap' },
     { icon: Layers, label: 'Flashcards', path: '/flashcards' },
     { icon: BookA, label: 'Glossário', path: '/glossary' },
+    { icon: Network, label: 'Mapa de Conhecimento', path: '/knowledge-map' },
     { icon: Calendar, label: 'Calendário', path: '/calendar' },
     { icon: GraduationCap, label: 'Cronograma', path: '/schedule' },
     { icon: BookOpen, label: 'Hub de Conteúdo', path: '/content-hub' },
