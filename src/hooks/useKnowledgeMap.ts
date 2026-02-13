@@ -12,7 +12,7 @@ export const useKnowledgeMap = () => {
   const { data: concepts = [], isLoading } = useQuery({
     queryKey: ['knowledge-concepts', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('knowledge_concepts')
         .select(`
           *,
@@ -48,7 +48,7 @@ export const useKnowledgeMap = () => {
   const { data: relationships = [] } = useQuery({
     queryKey: ['knowledge-relationships', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('knowledge_relationships')
         .select('*')
         .eq('user_id', user?.id);
@@ -79,7 +79,7 @@ export const useKnowledgeMap = () => {
       folderId?: string;
       tagIds?: string[];
     }) => {
-      const { data: concept, error } = await supabase
+      const { data: concept, error } = await (supabase as any)
         .from('knowledge_concepts')
         .insert({
           user_id: user?.id,
@@ -101,7 +101,7 @@ export const useKnowledgeMap = () => {
           concept_id: concept.id,
           tag_id: tagId,
         }));
-        await supabase.from('knowledge_concept_tags').insert(tagInserts);
+        await (supabase as any).from('knowledge_concept_tags').insert(tagInserts);
       }
 
       return concept;
@@ -125,7 +125,7 @@ export const useKnowledgeMap = () => {
       folderId?: string;
       tagIds?: string[];
     }) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('knowledge_concepts')
         .update({
           title: data.title,
@@ -141,13 +141,13 @@ export const useKnowledgeMap = () => {
       
       if (error) throw error;
 
-      await supabase.from('knowledge_concept_tags').delete().eq('concept_id', data.id);
+      await (supabase as any).from('knowledge_concept_tags').delete().eq('concept_id', data.id);
       if (data.tagIds && data.tagIds.length > 0) {
         const tagInserts = data.tagIds.map(tagId => ({
           concept_id: data.id,
           tag_id: tagId,
         }));
-        await supabase.from('knowledge_concept_tags').insert(tagInserts);
+        await (supabase as any).from('knowledge_concept_tags').insert(tagInserts);
       }
     },
     onSuccess: () => {
@@ -159,7 +159,7 @@ export const useKnowledgeMap = () => {
 
   const deleteConcept = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('knowledge_concepts')
         .delete()
         .eq('id', id);
@@ -181,7 +181,7 @@ export const useKnowledgeMap = () => {
       relationshipType: RelationshipType;
       description?: string;
     }) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('knowledge_relationships')
         .insert({
           user_id: user?.id,
@@ -202,7 +202,7 @@ export const useKnowledgeMap = () => {
 
   const deleteRelationship = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('knowledge_relationships')
         .delete()
         .eq('id', id);

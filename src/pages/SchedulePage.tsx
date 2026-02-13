@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
 import { Plus, Trash2, Clock, GraduationCap, Edit } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -132,6 +132,11 @@ const SchedulePage = () => {
     onError: () => toast.error('Erro ao remover aula'),
   });
 
+  const timeToMinutes = (t: string): number => {
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + m;
+  };
+
   // Build display slots (30-min intervals for the grid view)
   const DISPLAY_SLOTS: string[] = [];
   for (let h = 7; h <= 22; h++) {
@@ -152,43 +157,12 @@ const SchedulePage = () => {
   const snapDown = (t: string) => { const [h, m] = t.split(':').map(Number); return `${String(h).padStart(2, '0')}:${m < 30 ? '00' : '30'}`; };
   const snapUp = (t: string) => { const [h, m] = t.split(':').map(Number); return m > 30 ? `${String(h + 1).padStart(2, '0')}:00` : m > 0 ? `${String(h).padStart(2, '0')}:30` : t; };
 
-  const displaySlots = DISPLAY_SLOTS.filter(t => t >= snapDown(minTime) && t < snapUp(maxTime));
+  const displaySlots = DISPLAY_SLOTS.filter(t => t >= snapDown(minTime) && t <= snapUp(maxTime));
   if (displaySlots.length === 0 && classes.length === 0) {
     displaySlots.push(...DISPLAY_SLOTS.filter(t => t >= '08:00' && t <= '18:00'));
   }
 
-  const getClassForSlot = (dayIndex: number, time: string): ScheduleClass | null => {
-    return classes.find(c => 
-      c.day_of_week === dayIndex && 
-      c.start_time.slice(0, 5) <= time && 
-      c.end_time.slice(0, 5) > time
-    ) || null;
-  };
-
-  const isFirstSlotOfClass = (dayIndex: number, time: string): boolean => {
-    const cls = getClassForSlot(dayIndex, time);
-    if (!cls) return false;
-    // Find the first display slot that falls within this class's range
-    const firstSlot = displaySlots.find(s => 
-      cls.start_time.slice(0, 5) <= s && cls.end_time.slice(0, 5) > s && cls.day_of_week === dayIndex
-    );
-    return firstSlot === time;
-  };
-
-  const getClassRowSpan = (cls: ScheduleClass): number => {
-    const startTime = cls.start_time.slice(0, 5);
-    const endTime = cls.end_time.slice(0, 5);
-    // Find first display slot within class range
-    const firstIdx = displaySlots.findIndex(s => startTime <= s && endTime > s);
-    if (firstIdx === -1) return 1;
-    // Find last display slot within class range
-    let lastIdx = firstIdx;
-    for (let i = firstIdx + 1; i < displaySlots.length; i++) {
-      if (displaySlots[i] < endTime) lastIdx = i;
-      else break;
-    }
-    return lastIdx - firstIdx + 1;
-  };
+  const SLOT_HEIGHT = 48;
 
   return (
     <Layout>
@@ -287,72 +261,98 @@ const SchedulePage = () => {
         {/* Timetable grid */}
         <Card>
           <CardContent className="p-0 overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-20 text-center sticky left-0 bg-background z-10">
-                    <Clock className="w-4 h-4 mx-auto" />
-                  </TableHead>
-                  {DAYS.map(day => (
-                    <TableHead key={day} className="text-center min-w-[140px] font-semibold">{day}</TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {displaySlots.map(time => (
-                  <TableRow key={time} className="h-12">
-                    <TableCell className="text-center text-xs text-muted-foreground font-mono sticky left-0 bg-background z-10 border-r">
-                      {time}
-                    </TableCell>
-                    {DAYS.map((_, dayIndex) => {
-                      const cls = getClassForSlot(dayIndex, time);
-                      const isFirst = isFirstSlotOfClass(dayIndex, time);
-
-                      if (cls && !isFirst) return null;
-
-                      if (cls && isFirst) {
-                        const span = getClassRowSpan(cls);
-                        return (
-                          <TableCell
-                            key={dayIndex}
-                            rowSpan={span}
-                            className="p-1 align-top"
-                          >
-                            <div
-                              className="rounded-lg p-2 h-full text-sm group relative cursor-pointer"
-                              style={{ backgroundColor: (cls.color || '#6699cc') + '22', borderLeft: `3px solid ${cls.color || '#6699cc'}` }}
-                              onClick={() => openEdit(cls)}
-                            >
-                              <p className="font-semibold truncate" style={{ color: cls.color || '#6699cc' }}>
-                                {cls.subject}
-                              </p>
-                              {cls.room && <p className="text-xs text-muted-foreground truncate">{cls.room}</p>}
-                              {cls.teacher && <p className="text-xs text-muted-foreground truncate">{cls.teacher}</p>}
-                              <div className="absolute top-1 right-1 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); openEdit(cls); }}
-                                  className="p-1 rounded hover:bg-muted"
-                                >
-                                  <Edit className="w-3 h-3 text-muted-foreground" />
-                                </button>
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); deleteMutation.mutate(cls.id); }}
-                                  className="p-1 rounded hover:bg-destructive/10"
-                                >
-                                  <Trash2 className="w-3 h-3 text-destructive" />
-                                </button>
-                              </div>
-                            </div>
-                          </TableCell>
-                        );
-                      }
-
-                      return <TableCell key={dayIndex} className="border-r border-dashed" />;
-                    })}
-                  </TableRow>
+            <div className="min-w-[700px]">
+              {/* Header */}
+              <div className="grid grid-cols-[60px_repeat(6,1fr)] border-b">
+                <div className="p-2 text-center">
+                  <Clock className="w-4 h-4 mx-auto text-muted-foreground" />
+                </div>
+                {DAYS.map(day => (
+                  <div key={day} className="p-2 text-center font-semibold text-sm border-l">{day}</div>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+
+              {/* Body */}
+              <div className="grid grid-cols-[60px_repeat(6,1fr)]">
+                {/* Time labels column */}
+                <div className="border-r">
+                  {displaySlots.map(time => (
+                    <div
+                      key={time}
+                      className="text-center text-xs text-muted-foreground font-mono flex items-start justify-center pt-1 border-b border-dashed"
+                      style={{ height: SLOT_HEIGHT }}
+                    >
+                      {time}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Day columns */}
+                {DAYS.map((_, dayIndex) => {
+                  const baseMinutes = timeToMinutes(displaySlots[0]);
+                  const dayClasses = classes.filter(c => c.day_of_week === dayIndex);
+
+                  return (
+                    <div
+                      key={dayIndex}
+                      className="relative border-l"
+                      style={{ height: displaySlots.length * SLOT_HEIGHT }}
+                    >
+                      {/* Grid lines */}
+                      {displaySlots.map((_, i) => (
+                        <div
+                          key={i}
+                          className="absolute w-full border-b border-dashed"
+                          style={{ top: i * SLOT_HEIGHT, height: SLOT_HEIGHT }}
+                        />
+                      ))}
+
+                      {/* Class cards */}
+                      {dayClasses.map(cls => {
+                        const startMin = timeToMinutes(cls.start_time.slice(0, 5));
+                        const endMin = timeToMinutes(cls.end_time.slice(0, 5));
+                        const top = ((startMin - baseMinutes) / 30) * SLOT_HEIGHT;
+                        const height = ((endMin - startMin) / 30) * SLOT_HEIGHT;
+
+                        return (
+                          <div
+                            key={cls.id}
+                            className="absolute left-0.5 right-0.5 rounded-lg p-2 text-sm group cursor-pointer overflow-hidden z-10"
+                            style={{
+                              top,
+                              height,
+                              backgroundColor: (cls.color || '#6699cc') + '22',
+                              borderLeft: `3px solid ${cls.color || '#6699cc'}`,
+                            }}
+                            onClick={() => openEdit(cls)}
+                          >
+                            <p className="font-semibold truncate" style={{ color: cls.color || '#6699cc' }}>
+                              {cls.subject}
+                            </p>
+                            {cls.room && <p className="text-xs text-muted-foreground truncate">{cls.room}</p>}
+                            {cls.teacher && <p className="text-xs text-muted-foreground truncate">{cls.teacher}</p>}
+                            <div className="absolute top-1 right-1 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); openEdit(cls); }}
+                                className="p-1 rounded hover:bg-muted"
+                              >
+                                <Edit className="w-3 h-3 text-muted-foreground" />
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); deleteMutation.mutate(cls.id); }}
+                                className="p-1 rounded hover:bg-destructive/10"
+                              >
+                                <Trash2 className="w-3 h-3 text-destructive" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </CardContent>
         </Card>
 
