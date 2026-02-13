@@ -14,7 +14,6 @@ import FlashcardsPage from "./pages/FlashcardsPage";
 import CalendarPage from "./pages/CalendarPage";
 import ContentHubPage from "./pages/ContentHubPage";
 import GlossaryPage from "./pages/GlossaryPage";
-import KnowledgeMapPage from "./pages/KnowledgeMapPage";
 import SettingsPage from "./pages/SettingsPage";
 import ThemeSettingsPage from "./pages/ThemeSettingsPage";
 import ProfileSettingsPage from "./pages/ProfileSettingsPage";
@@ -65,7 +64,6 @@ const App = () => {
                 <Route path="/content-hub" element={<ProtectedRoute><ContentHubPage /></ProtectedRoute>} />
                 <Route path="/schedule" element={<ProtectedRoute><SchedulePage /></ProtectedRoute>} />
                 <Route path="/glossary" element={<ProtectedRoute><GlossaryPage /></ProtectedRoute>} />
-                <Route path="/knowledge-map" element={<ProtectedRoute><KnowledgeMapPage /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="/settings/theme" element={<ProtectedRoute><ThemeSettingsPage /></ProtectedRoute>} />
               <Route path="/settings/profile" element={<ProtectedRoute><ProfileSettingsPage /></ProtectedRoute>} />

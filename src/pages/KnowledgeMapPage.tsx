@@ -19,10 +19,9 @@ import {
   Trash2, 
   Link2,
   ArrowRight,
-  Filter,
-  X
+  Filter
 } from 'lucide-react';
-import { ConceptCategory, ConceptDifficulty, KnowledgeConcept } from '@/types/knowledge';
+import type { ConceptCategory, ConceptDifficulty, KnowledgeConcept } from '@/types/knowledge';
 
 const categories: { value: ConceptCategory; label: string; icon: string }[] = [
   { value: 'backend', label: 'Backend', icon: '🔧' },
