@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Plus, X, Tag as TagIcon, Star, Check, Loader2 } from 'lucide-react';
+import { Plus, X, Tag as TagIcon, Star, Check, Loader2, Eye, Edit3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { AISummarizeButton } from '@/components/ai/AISummarizeButton';
 import { AISuggestKeywordsButton } from '@/components/ai/AISuggestKeywordsButton';
+import { MarkdownRenderer } from '@/components/cornell/MarkdownRenderer';
 
 interface CornellNoteEditorProps {
   note?: CornellNoteType;
@@ -37,6 +38,7 @@ export const CornellNoteEditor = ({ note, onSave, onAutoSave }: CornellNoteEdito
   const { tags, folders, selectedFolderId } = useStudy();
   const [showKeywordDialog, setShowKeywordDialog] = useState(false);
   const [hasManualSave, setHasManualSave] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
 
   const [formData, setFormData] = useState<Omit<CornellNoteType, 'id' | 'createdAt' | 'updatedAt'>>({
     title: note?.title || '',
