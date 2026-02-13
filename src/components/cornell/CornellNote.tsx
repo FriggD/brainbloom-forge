@@ -235,15 +235,41 @@ export const CornellNoteEditor = ({ note, onSave, onAutoSave }: CornellNoteEdito
 
           {/* Main Notes Column */}
           <div className="md:col-span-2 p-4">
-            <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-4">
-              Anotações Principais
-            </h3>
-            <Textarea
-              value={formData.mainNotes}
-              onChange={(e) => setFormData((prev) => ({ ...prev, mainNotes: e.target.value }))}
-              placeholder="Escreva suas anotações principais aqui..."
-              className="min-h-[320px] resize-none border-0 focus-visible:ring-0 p-0 text-sm leading-relaxed"
-            />
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
+                Anotações Principais
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPreviewMode(!previewMode)}
+                className="h-7"
+              >
+                {previewMode ? (
+                  <>
+                    <Edit3 className="w-4 h-4 mr-2" />
+                    Editar
+                  </>
+                ) : (
+                  <>
+                    <Eye className="w-4 h-4 mr-2" />
+                    Preview
+                  </>
+                )}
+              </Button>
+            </div>
+            {previewMode ? (
+              <div className="min-h-[320px] p-4 bg-muted/30 rounded-lg">
+                <MarkdownRenderer content={formData.mainNotes || '*Nenhuma anotação ainda*'} />
+              </div>
+            ) : (
+              <Textarea
+                value={formData.mainNotes}
+                onChange={(e) => setFormData((prev) => ({ ...prev, mainNotes: e.target.value }))}
+                placeholder="Escreva suas anotações principais aqui...\n\nSuporta Markdown:\n- **negrito** *itálico*\n- # Títulos\n- ```code```\n- [links](url)\n\nE Mermaid para diagramas:\n```mermaid\ngraph TD\n  A-->B\n```"
+                className="min-h-[320px] resize-none border-0 focus-visible:ring-0 p-0 text-sm leading-relaxed font-mono"
+              />
+            )}
           </div>
         </div>
 
@@ -253,19 +279,35 @@ export const CornellNoteEditor = ({ note, onSave, onAutoSave }: CornellNoteEdito
             <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
               Resumo
             </h3>
-            <AISummarizeButton
-              text={formData.mainNotes}
-              onSummaryGenerated={(summary) => {
-                setFormData(prev => ({ ...prev, summary }));
-              }}
-            />
+            <div className="flex items-center gap-2">
+              <AISummarizeButton
+                text={formData.mainNotes}
+                onSummaryGenerated={(summary) => {
+                  setFormData(prev => ({ ...prev, summary }));
+                }}
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPreviewMode(!previewMode)}
+                className="h-7"
+              >
+                {previewMode ? <Edit3 className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </Button>
+            </div>
           </div>
-          <Textarea
-            value={formData.summary}
-            onChange={(e) => setFormData((prev) => ({ ...prev, summary: e.target.value }))}
-            placeholder="Sintetize os pontos principais em suas próprias palavras..."
-            className="min-h-[100px] resize-none"
-          />
+          {previewMode ? (
+            <div className="min-h-[100px] p-4 bg-background rounded-lg">
+              <MarkdownRenderer content={formData.summary || '*Nenhum resumo ainda*'} />
+            </div>
+          ) : (
+            <Textarea
+              value={formData.summary}
+              onChange={(e) => setFormData((prev) => ({ ...prev, summary: e.target.value }))}
+              placeholder="Sintetize os pontos principais em suas próprias palavras..."
+              className="min-h-[100px] resize-none font-mono"
+            />
+          )}
         </div>
       </Card>
 
