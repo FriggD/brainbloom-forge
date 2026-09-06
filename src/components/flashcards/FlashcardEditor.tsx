@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Flashcard } from '@/types/flashcard';
+import { isImageContent } from '@/lib/cardContent';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -162,8 +163,16 @@ export const FlashcardEditor = ({
                           #{index + 1}
                         </span>
                       </div>
-                      <p className="text-sm font-medium mb-1">{card.front}</p>
-                      <p className="text-sm text-muted-foreground">{card.back}</p>
+                      {isImageContent(card.front) ? (
+                        <img src={card.front} alt="Frente" className="h-16 rounded mb-1 border" />
+                      ) : (
+                        <p className="text-sm font-medium mb-1">{card.front}</p>
+                      )}
+                      {isImageContent(card.back) ? (
+                        <img src={card.back} alt="Verso" className="h-16 rounded border" />
+                      ) : (
+                        <p className="text-sm text-muted-foreground">{card.back}</p>
+                      )}
                     </div>
                     <div className="flex gap-1">
                       <Button size="icon" variant="ghost" onClick={() => startEdit(card)}>

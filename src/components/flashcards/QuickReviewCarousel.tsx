@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Flashcard } from '@/types/flashcard';
 import { cn } from '@/lib/utils';
+import { isImageContent } from '@/lib/cardContent';
 
 interface QuickReviewCarouselProps {
   allCards: Flashcard[];
@@ -104,9 +105,17 @@ export const QuickReviewCarousel = ({ allCards }: QuickReviewCarouselProps) => {
             className="absolute inset-0 w-full min-h-[200px] p-6 flex items-center justify-center backface-hidden bg-card border-2"
             style={{ backfaceVisibility: 'hidden' }}
           >
-            <p className="text-lg text-center whitespace-pre-wrap">
-              {currentCard.front}
-            </p>
+            {isImageContent(currentCard.front) ? (
+              <img
+                src={currentCard.front}
+                alt="Frente do flashcard"
+                className="max-w-full max-h-full object-contain rounded"
+              />
+            ) : (
+              <p className="text-lg text-center whitespace-pre-wrap">
+                {currentCard.front}
+              </p>
+            )}
           </Card>
 
           {/* Back */}
@@ -117,9 +126,17 @@ export const QuickReviewCarousel = ({ allCards }: QuickReviewCarouselProps) => {
               transform: 'rotateY(180deg)',
             }}
           >
-            <p className="text-lg text-center whitespace-pre-wrap">
-              {currentCard.back}
-            </p>
+            {isImageContent(currentCard.back) ? (
+              <img
+                src={currentCard.back}
+                alt="Verso do flashcard"
+                className="max-w-full max-h-full object-contain rounded"
+              />
+            ) : (
+              <p className="text-lg text-center whitespace-pre-wrap">
+                {currentCard.back}
+              </p>
+            )}
           </Card>
         </div>
       </div>

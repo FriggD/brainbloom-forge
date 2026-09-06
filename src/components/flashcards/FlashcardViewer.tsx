@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Flashcard } from '@/types/flashcard';
 import { cn } from '@/lib/utils';
+import { isImageContent } from '@/lib/cardContent';
 
 interface FlashcardViewerProps {
   cards: Flashcard[];
@@ -107,10 +108,18 @@ export const FlashcardViewer = ({ cards, onClose }: FlashcardViewerProps) => {
             )}
             style={{ backfaceVisibility: 'hidden' }}
           >
-            <p className={cn(
-              "text-center whitespace-pre-wrap",
-              focusMode ? "text-2xl md:text-3xl" : "text-lg md:text-xl"
-            )}>{currentCard.front}</p>
+            {isImageContent(currentCard.front) ? (
+              <img
+                src={currentCard.front}
+                alt="Frente do flashcard"
+                className="max-w-full max-h-full object-contain rounded"
+              />
+            ) : (
+              <p className={cn(
+                "text-center whitespace-pre-wrap",
+                focusMode ? "text-2xl md:text-3xl" : "text-lg md:text-xl"
+              )}>{currentCard.front}</p>
+            )}
           </Card>
 
           {/* Back */}
@@ -125,10 +134,18 @@ export const FlashcardViewer = ({ cards, onClose }: FlashcardViewerProps) => {
               transform: 'rotateY(180deg)',
             }}
           >
-            <p className={cn(
-              "text-center whitespace-pre-wrap",
-              focusMode ? "text-2xl md:text-3xl" : "text-lg md:text-xl"
-            )}>{currentCard.back}</p>
+            {isImageContent(currentCard.back) ? (
+              <img
+                src={currentCard.back}
+                alt="Verso do flashcard"
+                className="max-w-full max-h-full object-contain rounded"
+              />
+            ) : (
+              <p className={cn(
+                "text-center whitespace-pre-wrap",
+                focusMode ? "text-2xl md:text-3xl" : "text-lg md:text-xl"
+              )}>{currentCard.back}</p>
+            )}
           </Card>
         </div>
       </div>
