@@ -46,10 +46,11 @@ export const MarkdownRenderer = ({ content, className = '' }: MarkdownRendererPr
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
         components={{
-          code({ node, inline, className, children, ...props }) {
+          code({ node, className, children, ...props }: any) {
             const match = /language-(\w+)/.exec(className || '');
             const lang = match ? match[1] : '';
-            
+            const inline = !className;
+
             if (!inline && lang === 'mermaid') {
               return (
                 <pre className={className}>
